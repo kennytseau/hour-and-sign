@@ -341,7 +341,9 @@ button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--g
   font-family:var(--font-label); font-size:.76rem; font-weight:700; letter-spacing:.2em;
   text-transform:uppercase; margin:0 0 .8rem; color:var(--spectre);
 }
+.oneoff-rule{font-size:.95rem;line-height:1.65;color:var(--bone-dim);margin:0 0 1rem;max-width:58ch}
 .oneoff .row{display:flex;flex-wrap:wrap;gap:.8rem;align-items:stretch}
+#clarify{margin-top:1rem}
 .oneoff input{
   flex:1 1 14rem; min-width:0; font-family:var(--font-label); font-size:1rem; height:3rem;
   color:var(--bone); background:var(--void); border:1px solid var(--rule); padding:.72rem .75rem;
@@ -457,6 +459,10 @@ footer b{color:var(--gold);font-weight:600}
           <dd>An old system giving every hour of the day a ruling planet, cycling in a fixed order. It is why Sunday is the Sun's day and Monday is the Moon's.</dd>
           <dt>The frightening looking cards</dt>
           <dd>Death, The Tower, The Devil and the Three of Swords alarm nearly everyone on a first reading. None of them is literal. They are about endings, sudden clarity, habits and plain old heartbreak, and each says so on the card itself. Nothing has been removed from this deck to spare you.</dd>
+          <dt>Asking twice</dt>
+          <dd>You get one card per question, once a day. Dealing again and again on the same question until the answer improves is the one thing every reader will tell you not to do, so the page simply will not let you. You may draw a single clarifier, which is allowed, and then that question is closed until tomorrow.</dd>
+          <dt>How exact is any of this?</dt>
+          <dd>Not very, and deliberately so. Sunrise is treated as six in the morning, because the page never asks where you are. The rising sign uses equal two hour houses rather than a real ephemeris. The moon is an average month, and Mercury's retrograde is modelled rather than looked up, so both can be a day or two out at the edges. That is plenty for a card a day. Nothing you type ever leaves your browser.</dd>
         </dl>
       </div>
     </details>
@@ -519,7 +525,7 @@ footer b{color:var(--gold);font-weight:600}
               </select>
             </div>
           </div>
-          <p>Reversals change orientation only, never which cards appear. Weighting applies traditional correspondences to the shuffle, and is listed in full under <strong>The odds</strong> below. Nothing is ever excluded from the deck.</p>
+          <p>Reversals change the orientation of a card, never which cards appear. Weighting lets the sky lean on the shuffle, using the old correspondences between the planets, the signs and the Major Arcana, so the card of the hour's ruling planet comes up a little more often. Turn it off and the deck is perfectly flat. Either way, no card is ever excluded.</p>
         </div>
       </details>
 
@@ -551,14 +557,17 @@ footer b{color:var(--gold);font-weight:600}
     <div class="reading" id="reading" aria-live="polite"></div>
 
     <div class="oneoff">
-      <h3>Ask one question, for a genuinely random single card</h3>
+      <h3>Ask the deck one question</h3>
+      <p class="oneoff-rule">One question, one card, once a day. Ask something else if you like, but you cannot ask the same thing twice and keep dealing until you get the answer you wanted. That is the oldest rule at the table.</p>
       <div class="row">
         <input type="text" id="question" maxlength="90" placeholder="Should I send the email?" aria-label="Your question">
-        <button type="button" id="ask">Pull a card</button>
+        <button type="button" id="ask">Ask</button>
       </div>
       <div id="oneoff-out" hidden>
         <p class="result" id="oneoff-result"></p>
+        <p class="result" id="oneoff-clarifier" hidden></p>
         <p class="meta" id="oneoff-meta"></p>
+        <button type="button" class="ghost" id="clarify" hidden>Draw one clarifier</button>
       </div>
     </div>
   </section>
@@ -569,24 +578,6 @@ footer b{color:var(--gold);font-weight:600}
       <span class="note">Out of 100, and not to be taken seriously</span>
     </div>
     <div class="dials" id="dials"></div>
-
-    <details id="odds">
-      <summary>The odds, and what is bending them</summary>
-      <div class="details-body">
-        <p>A flat deck gives every card the same chance. This one does not, when weighting is on. Traditional correspondences raise some cards' odds for this exact hour and date. Nothing is ever excluded, so the worst weighted card in the deck can still be the first one dealt. Here is precisely what is applied right now.</p>
-        <table class="odds" id="odds-table"></table>
-        <p id="odds-note"></p>
-      </div>
-    </details>
-
-    <details id="method">
-      <summary>How this draw was made</summary>
-      <div class="details-body">
-        <p>No server, and nothing stored anywhere but your own browser. The daily cards come from a seeded pseudo random generator, so the same inputs always produce the same spread. Refresh as often as you like, it will not budge until the hour turns. The one question card above is the opposite: it uses the browser's cryptographic randomness and is different every single time.</p>
-        <ul class="seedlist" id="seedlist"></ul>
-        <p id="method-notes"></p>
-      </div>
-    </details>
 
     <div class="actions">
       <button type="button" class="ghost" id="copy">Copy reading</button>
@@ -811,13 +802,16 @@ function risingSign(sunIdx, birthHour){
 const CHALDEAN = ["Saturn","Jupiter","Mars","Sun","Venus","Mercury","Moon"];
 const DAY_RULER = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
 const PLANETS = {
-  Saturn:  { glyph:"\u2644", mood:"slow, serious and allergic to shortcuts", do:"and do it slowly.", of:"limits, patience and old debts" },
-  Jupiter: { glyph:"\u2643", mood:"generous and a little over confident",    do:"and ask for more than you need.", of:"luck, scale and generosity" },
-  Mars:    { glyph:"\u2642", mood:"sharp edged and impatient",               do:"and do it now.", of:"heat, conflict and getting started" },
-  Sun:     { glyph:"\u2609", mood:"bright, visible, hard to hide in",        do:"where people can see.", of:"clarity, pride and being seen" },
-  Venus:   { glyph:"\u2640", mood:"soft, sociable, easily charmed",          do:"with someone you like.", of:"pleasure, taste and other people" },
-  Mercury: { glyph:"\u263f", mood:"quick, talkative and prone to typos",     do:"and get it in writing.", of:"messages, deals and quick thinking" },
-  Moon:    { glyph:"\u263e", mood:"tidal and a bit dreamlike",               do:"and do not explain yourself.", of:"mood, memory and the half remembered" }
+  /* "do" is a whole sentence of its own. It used to be a trailing clause,
+     which produced "it is fine. and get it in writing." once it was appended
+     to a counsel line that already ended in a full stop. */
+  Saturn:  { glyph:"\u2644", mood:"slow, serious and allergic to shortcuts", do:"Do it slowly, and only once.", of:"limits, patience and old debts" },
+  Jupiter: { glyph:"\u2643", mood:"generous and a little over confident",    do:"Then ask for more than you need.", of:"luck, scale and generosity" },
+  Mars:    { glyph:"\u2642", mood:"sharp edged and impatient",               do:"Do it now rather than well.", of:"heat, conflict and getting started" },
+  Sun:     { glyph:"\u2609", mood:"bright, visible, hard to hide in",        do:"Do it where people can see.", of:"clarity, pride and being seen" },
+  Venus:   { glyph:"\u2640", mood:"soft, sociable, easily charmed",          do:"Do it with someone you like.", of:"pleasure, taste and other people" },
+  Mercury: { glyph:"\u263f", mood:"quick, talkative and prone to typos",     do:"Check the wording twice before it goes.", of:"messages, deals and quick thinking" },
+  Moon:    { glyph:"\u263e", mood:"tidal and a bit dreamlike",               do:"Do not explain yourself afterwards.", of:"mood, memory and the half remembered" }
 };
 function planetaryHour(date){
   const dow = date.getDay();
@@ -1108,7 +1102,7 @@ const DIGNITY_TEXT = {
 };
 
 function compose(ctx, cards, soul, rnd){
-  const { sign, rising, watch, ph, moon, animal, name, rx, weighted } = ctx;
+  const { sign, rising, watch, ph, moon, animal, name, rx, weighted, now } = ctx;
   const el = ELEMENTS[sign.el];
   const planet = PLANETS[ph.ruler];
   const hc = cards[0], sc = cards[1], tc = cards[2];
@@ -1117,39 +1111,42 @@ function compose(ctx, cards, soul, rnd){
   const who = name ? name : "You";
   const art = p => (p === "Sun" || p === "Moon") ? "the " + p : p;
   const cardEl = c => c.card.major ? null : c.card.el;
+  const seasonSign = signFor(now.getMonth() + 1, now.getDate());
   const out = [];
 
-  /* 1. the hour */
-  out.push('<h3>The hour</h3>');
-  out.push('<p class="lead">' + pick(rnd, [
+  /* 1. star sign: the part of you that never moves */
+  out.push('<h3>Your star sign</h3>');
+  out.push('<p class="lead">' + who + " " + (name ? "is" : "are") + " a <strong>" + sign.name +
+    "</strong> sun, " + sign.trait + ".</p>");
+  out.push("<p>That puts you under " + sign.ruler + ", in the element of " + sign.el + ", which runs " + el.verb +
+    ". Your default move, when nothing else is pressing, is to " + el.grain + ". " +
+    (rising
+      ? "With <strong>" + rising.name + "</strong> rising, that is not the version people meet first. They get " +
+        rising.trait + ", and have to stay a while to find the " + sign.name + " underneath."
+      : "No birth hour given, so there is no rising sign here. Add one above and you get the mask as well as the face.") +
+    " You were born in a <strong>" + animal + "</strong> year, which mostly means " +
+    pick(rnd, ["you will get away with it", "people underestimate your timing", "stubbornness counts as a strategy here", "you are owed a favour somewhere"]) + ".</p>");
+  out.push("<p>None of that changes. It is the fixed part, and everything below is weather blowing across it.</p>");
+
+  /* 2. horoscope: the sky as it is right now */
+  out.push('<h3>Your horoscope</h3>');
+  out.push("<p>" + pick(rnd, [
     "It is <strong>" + watch.name + "</strong>, and " + watch.phrase + ".",
     "<strong>" + watch.name + "</strong> is holding the deck, and " + watch.phrase + ".",
     "<strong>" + watch.name + "</strong>, which means " + watch.phrase + "."
-  ]) + "</p>");
-  out.push("<p>By the old reckoning this is an hour of <strong>" + art(ph.ruler) + "</strong> " + planet.glyph +
-    ", the " + ordinal(ph.hourIndex + 1) +
-    " hour after sunrise on a day ruled by " + art(ph.dayRuler) + ". " +
+  ]) + " By the old reckoning this is an hour of <strong>" + art(ph.ruler) + "</strong> " + planet.glyph +
+    ", the " + ordinal(ph.hourIndex + 1) + " hour after sunrise on a day ruled by " + art(ph.dayRuler) + ". " +
     art(ph.ruler).charAt(0).toUpperCase() + art(ph.ruler).slice(1) + " governs " + planet.of +
-    ", and the hour is " + planet.mood + ". That is the weather the cards are being dealt into.</p>");
+    ", and the hour is " + planet.mood + ".</p>");
+  out.push("<p>The sun is currently in <strong>" + seasonSign.name + "</strong>, so the season is pushing everyone toward being " +
+    seasonSign.trait + ", whether it suits them or not. The moon is <strong>" + moon.name + "</strong> at " +
+    moon.lit + " per cent lit, which is the part of the month where " + moon.phrase + ".</p>");
   if (rx.active){
-    out.push("<p><strong>Mercury is retrograde</strong>, give or take a few days. The deck leans on the cards of delay, review and the misread message while it lasts, and it tips more cards upside down than usual. Read twice, send once.</p>");
+    out.push("<p><strong>Mercury is retrograde</strong>, give or take a few days, which is the one piece of sky most people notice. Expect the misread message and the thing that needs saying twice.</p>");
   }
 
-  /* 2. your chart */
-  out.push('<h3>Your chart</h3>');
-  out.push("<p>" + who + " " + (name ? "is" : "are") + " a <strong>" + sign.name + "</strong> sun, " + sign.trait +
-    ". That puts you under " + sign.ruler + " and in the element of " + sign.el + ", which runs " + el.verb +
-    ". Your default move, when nothing else is pressing, is to " + el.grain + ".</p>");
-  out.push("<p>" + (rising
-    ? "With <strong>" + rising.name + "</strong> rising, that is not the version people meet first. They get " + rising.trait +
-      ", and have to stay a while to find the " + sign.name + " underneath. "
-    : "No birth hour given, so there is no rising sign here. Add one above and you get the mask as well as the face. ") +
-    "The moon is <strong>" + moon.name + "</strong> at " + moon.lit + " per cent lit, which is the part of the month where " + moon.phrase +
-    ". You were born in a <strong>" + animal + "</strong> year, which mostly means " +
-    pick(rnd, ["you will get away with it", "people underestimate your timing", "stubbornness counts as a strategy here", "you are owed a favour somewhere"]) + ".</p>");
-
-  /* 3. the three cards */
-  out.push('<h3>The three cards</h3>');
+  /* 3. the cards */
+  out.push('<h3>Your cards</h3>');
   out.push("<p><strong>" + hc.card.name + (hc.rev ? ", reversed" : "") + "</strong> sits in the hour. " +
     "This is the card for this stretch of the day only, dealt off the hand your deck was shuffled into at midnight, and it will be a different one when the watch turns. " +
     "It reads as " + full(hc) + ". " +
@@ -1168,8 +1165,7 @@ function compose(ctx, cards, soul, rnd){
     "It reads as " + full(tc) + ". " +
     '<span class="said">' + tc.card.voice + "</span></p>");
 
-  /* 4. how they read together */
-  out.push('<h3>Reading them together</h3>');
+  /* how the three cards sit with each other, still under Your cards */
   const majors = cards.filter(c => c.card.major).length;
   const revs = cards.filter(c => c.rev).length;
   const suitsInPlay = [...new Set(cards.filter(c => !c.card.major).map(c => c.card.suitName))];
@@ -1194,23 +1190,87 @@ function compose(ctx, cards, soul, rnd){
   else if (revs === 1) out.push("<p>One card is reversed, which is the usual amount. Treat it as the same idea running slower, or blocked, rather than its opposite.</p>");
   else out.push("<p>Both moving cards are reversed. That is a lot of friction for one day. It rarely means bad news, but it does mean nothing is going to arrive by the front door.</p>");
 
+  /* 4. putting it together: where the three strands actually touch.
+     Every line here only appears when the correspondence genuinely fires,
+     so the section says nothing it cannot back up. */
+  out.push('<h3>Putting it together</h3>');
+  const links = [];
+
+  const hourCardId = PLANET_MAJOR[ph.ruler];
+  if (cards.some(c => c.idx === hourCardId)){
+    links.push("<strong>" + DECK[hourCardId].name + "</strong> is the card that has always belonged to " + art(ph.ruler) +
+      ", and it has turned up in an hour that " + ph.ruler + " rules. The clock and the deck are saying the same thing, " +
+      "which is as close to emphasis as a spread gets.");
+  }
+  const mySignCardId = SIGN_MAJOR[sign.name];
+  if (cards.some(c => c.idx === mySignCardId)){
+    links.push("Your own sign's card, <strong>" + DECK[mySignCardId].name + "</strong>, is sitting in the spread. " +
+      sign.name + " has been handed its own symbol back, which reads as being asked to be more like yourself today, not less.");
+  }
+  const seasonCardId = SIGN_MAJOR[seasonSign.name];
+  if (seasonSign.name !== sign.name && cards.some(c => c.idx === seasonCardId)){
+    links.push("The sun is in " + seasonSign.name + " and <strong>" + DECK[seasonCardId].name +
+      "</strong>, that sign's card, has come up. The pressure is coming from the season rather than from your own chart, " +
+      "so it will pass on its own.");
+  }
+
+  const minors = cards.filter(c => !c.card.major);
+  const sameEl = minors.filter(c => c.card.el === sign.el);
+  const oppEl = minors.filter(c => DIGNITY[sign.el][c.card.el] === "opposed");
+  if (sameEl.length){
+    links.push("You are a <strong>" + sign.el + "</strong> sign, and " +
+      (sameEl.length > 1 ? "two of the cards are " : "one of the cards is ") +
+      sameEl.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") + ", " + sign.el +
+      " as well. The deck has handed you your own element, so whatever it is asking for should feel natural rather than effortful.");
+  }
+  if (oppEl.length){
+    links.push("Your own element, <strong>" + sign.el + "</strong>, runs against " +
+      oppEl.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") +
+      ", which " + (oppEl.length > 1 ? "are " : "is ") + oppEl[0].card.el +
+      ". Opposed elements weaken each other, so this is the part of the day that will feel like wading. Do it anyway, just slower.");
+  }
+
+  const beginnings = cards.filter(c => WAXING_MAJORS.includes(c.idx)).length;
+  const endings = cards.filter(c => WANING_MAJORS.includes(c.idx)).length;
+  if (moon.dir === "waxing" && beginnings && !endings)
+    links.push("A waxing moon and the cards of beginning in the same spread is the cleanest alignment on offer. Start the thing.");
+  else if (moon.dir === "waxing" && endings && !beginnings)
+    links.push("The moon is still growing but the cards are the cards of ending. Something needs finishing before the new thing can have the room, and the order matters.");
+  else if (moon.dir === "waning" && endings && !beginnings)
+    links.push("A waning moon and the cards of ending agree with each other. This is a week for closing rather than opening, and it will not feel like a loss.");
+  else if (moon.dir === "waning" && beginnings && !endings)
+    links.push("The moon is shrinking while the cards point at beginnings. Start it quietly and do not announce it until the moon turns.");
+  else if (moon.dir === "full" && (beginnings || endings))
+    links.push("A full moon lights both the beginnings and the endings at once, which is why the spread can feel like it is arguing with itself. It is not. It is showing you both ends of the same thing.");
+
+  if (rx.active && cards.some(c => c.card.suit === "swords"))
+    links.push("Mercury is retrograde and Swords, the suit of speech and thought, are on the table. That is the combination that produces the message you wish you had read twice.");
+
+  if (links.length){
+    out.push("<p>Three separate systems were asked the same thing just now: the sign you were born under, the sky as it stands this hour, and the cards. Here is where they actually touch.</p>");
+    links.forEach(l => out.push("<p>" + l + "</p>"));
+  } else {
+    out.push("<p>Three separate systems were asked the same thing just now, and today they are not echoing each other. " +
+      "Nothing in the sky has picked up the cards, and the cards have not picked up your chart. " +
+      "That is worth knowing rather than worth hiding: it means the cards are on their own today, and you can read them plainly, " +
+      "without looking for a pattern that is not there.</p>");
+  }
+
   const tone = cards.reduce((a, c) => a + (c.rev ? -c.card.tone : c.card.tone), 0);
   out.push("<p>" + (tone >= 3 ? "Taken together the spread is unusually bright. If you have been waiting for a good day to ask for something, this is it."
     : tone >= 1 ? "The balance of the spread tilts gently positive. Not a parade, but the wind is behind you."
     : tone === 0 ? "The spread balances out to nothing in particular, which is its own kind of answer: today is yours to push one way or the other."
     : tone >= -2 ? "The spread leans heavy. Nothing here is a disaster, but it is a day for maintenance rather than ambition."
-    : "This is a heavy spread. Lower the bar, finish one thing, and let the rest wait for the hour to turn.") + "</p>");
-
-  if (!weighted){
-    out.push("<p>Weighting is off, so this came from a perfectly flat deck. Every one of the cards had exactly the same chance of turning up, which some readers consider the only honest way to do it.</p>");
-  }
+    : "This is a heavy spread. Lower the bar, finish one thing, and let the rest wait for the hour to turn.") +
+    " Your " + sign.name + " sun would rather " + el.grain + ", and " + art(ph.ruler) +
+    " is running this hour. Between the two of them, that is what the line below comes down to.</p>");
 
   /* 5. what to do */
   const counselBank = {
     Fire:  ["Do the loud version first and apologise never.", "Pick the one that scares you slightly and start today.", "Do not wait for the group to agree."],
     Earth: ["Finish one unglamorous thing completely.", "Put it in writing, then put it down.", "Protect the hour you actually work in."],
-    Air:   ["Say it out loud to one person before the day ends.", "Write the short version. The short version is the real one.", "Change your mind in public, it is fine."],
-    Water: ["Answer the message you have been circling.", "Feel it all the way through, then make the call.", "Trust the first read, check the second."]
+    Air:   ["Say it out loud to one person today.", "Write the short version. The short version is the real one.", "Change your mind in public, it is fine."],
+    Water: ["Answer the message you have been circling.", "Feel it all the way through, then make the call.", "Trust the first read and act on it."]
   };
   const counsel = pick(rnd, counselBank[sign.el]) + " " + planet.do + (rx.active ? " And read it twice before you send it." : "");
   out.push('<div class="counsel"><span>What to actually do</span>' + counsel + "</div>");
@@ -1321,39 +1381,6 @@ function render(opts){
     document.querySelectorAll(".fill").forEach(f => { f.style.width = "calc(" + f.dataset.w + "% - 2px)"; });
   });
 
-  if (!weighted){
-    $("odds-table").innerHTML = "<tr><th>Status</th></tr><tr><td>Flat deck. Every one of the " +
-      drawn.seeds.deckSize + " cards has exactly the same chance.</td></tr>";
-    $("odds-note").textContent = "Switch Astrology back to weighting under Reading options to apply the traditional correspondences.";
-  } else {
-    $("odds-table").innerHTML =
-      "<tr><th>Odds</th><th>Why</th><th>Cards lifted</th></tr>" +
-      drawn.reasons.map(r =>
-        '<tr><td class="mult">x' + r.mult.toFixed(2) + "</td><td>" + r.why + "</td><td>" +
-        (r.cards.length > 4 ? r.cards.length + " cards" : r.cards.join(", ")) + "</td></tr>").join("") +
-      (drawn.effRate !== revRate
-        ? '<tr><td class="mult">+10pp</td><td>Mercury retrograde tips more cards over</td><td>reversal chance now ' +
-          Math.round(drawn.effRate * 100) + " per cent</td></tr>"
-        : "");
-    $("odds-note").textContent = "Multipliers apply to a weighted shuffle, not a lottery. A card at x2.5 is two and a half " +
-      "times as likely to come off the top, and the lowest weighted card in the deck can still be the first one dealt.";
-  }
-
-  $("seedlist").innerHTML = [
-    ["standing card", bM + " + " + bD + " + " + bY + ", digit reduced, giving " + DECK[cards[1].idx].n + ". " + DECK[cards[1].idx].name + " by Greer's method"],
-    ["day's deck",    'shuffled from "' + drawn.seeds.birthKey + " | " + drawn.seeds.dayKey + '", ' + drawn.seeds.deckSize + " cards, 8 watches dealt off the top, no repeats"],
-    ["this watch",    "number " + (drawn.seeds.wb + 1) + " of 8, giving " + DECK[cards[0].idx].name],
-    ["today's card",  "moon phase " + moon.idx + " plus sun in " + signFor(now.getMonth() + 1, now.getDate()).name + ", giving " + DECK[cards[2].idx].name],
-    ["reversals",     revRate === 0 ? "off" : Math.round(drawn.effRate * 100) + " per cent chance per card, orientation only"],
-    ["planetary hour", ph.dayRuler + "'s day, hour " + (ph.hourIndex + 1) + " after sunrise, giving " + ph.ruler + " in Chaldean order"],
-    ["weighting",     weighted ? drawn.reasons.length + " correspondences applied" : "off, flat deck"]
-  ].map(row => "<li><b>" + row[0] + "</b> " + row[1] + "</li>").join("");
-  $("method-notes").textContent =
-    "Approximations, stated plainly. Sunrise is treated as 06:00 because the page never asks where you are. " +
-    "The rising sign uses equal two hour houses rather than an ephemeris. The moon is a mean synodic month, good to a few hours. " +
-    "Mercury retrograde is modelled from its 115.88 day synodic period rather than looked up, so it can be a few days out at the edges. " +
-    "The Chinese year turns on 4 February rather than the true lunar new year.";
-
   $("example-flag").hidden = !isExample;
   LAST = { cards, soul, read, wx, sign, rising, watch, ph, moon, rx, animal,
            bdate, bhour, name, revRate, deckSize, weighted };
@@ -1453,20 +1480,79 @@ function tickCountdown(){
       setTimeout(() => c.classList.add("flipped"), n * 280)), 450);
   });
 
-  $("ask").addEventListener("click", () => {
-    const ids = LAST && LAST.deckSize === 22 ? MAJOR_IDS : DECK.map(c => c.id);
-    const card = DECK[ids[Math.floor(cryptoRnd() * ids.length)]];
+  /* One question, one card, once a day.
+     Dealing repeatedly on the same question until the answer improves is the
+     one thing every reader warns against, so the answer is stored against the
+     question and the date, and asking again returns the same card. The draw
+     itself is still genuinely random the first time; it just cannot be
+     re-rolled. A single clarifier is allowed, which is traditional. */
+  const QKEY = "hour-and-sign-answers";
+  const normalise = q => q.toLowerCase().replace(/[^a-z0-9 ]+/g, "").replace(/\s+/g, " ").trim();
+  const todayKey = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
+  const loadAnswers = () => { try { return JSON.parse(localStorage.getItem(QKEY) || "{}"); } catch (e) { return {}; } };
+  const saveAnswers = o => { try { localStorage.setItem(QKEY, JSON.stringify(o)); } catch (e) {} };
+  const deckIds = () => (LAST && LAST.deckSize === 22) ? MAJOR_IDS : DECK.map(c => c.id);
+  const drawOne = () => {
+    const ids = deckIds();
     const rate = LAST ? LAST.revRate : 0.32;
-    const rev = rate > 0 && cryptoRnd() < rate;
-    const qText = $("question").value.trim();
+    return { id:ids[Math.floor(cryptoRnd() * ids.length)], rev:rate > 0 && cryptoRnd() < rate };
+  };
+  const describe = (entry, label) => {
+    const card = DECK[entry.id];
+    return (label ? "<em>" + label + "</em> " : "") + "<b>" + card.name + "</b>" +
+      (entry.rev ? ", reversed" : "") + ". " + (entry.rev ? card.rev : card.up) + ". " +
+      "<em>" + card.voice + "</em>";
+  };
+  let currentKey = null;
+
+  function showAnswer(key, store, fresh){
+    const entry = store[key];
     $("oneoff-out").hidden = false;
-    $("oneoff-result").innerHTML =
-      (qText ? '"' + esc(qText) + '" &rarr; ' : "") +
-      "<b>" + card.name + "</b>" + (rev ? ", reversed" : "") + ". " +
-      (rev ? card.rev : card.up) + ". <em>" + card.voice + "</em>";
-    $("oneoff-meta").textContent =
-      "Drawn from " + ids.length + " cards with crypto.getRandomValues. Flat odds, no weighting, " +
-      "nothing saved. Press again for a genuinely different card.";
+    $("oneoff-result").innerHTML = '"' + esc(entry.q) + '" &rarr; ' + describe(entry, "");
+    if (entry.clarifier){
+      $("oneoff-clarifier").hidden = false;
+      $("oneoff-clarifier").innerHTML = describe(entry.clarifier, "Clarifier:");
+      $("clarify").hidden = true;
+      $("oneoff-meta").textContent = "Asked and clarified. This question is closed until tomorrow. Ask something else if you need to.";
+    } else {
+      $("oneoff-clarifier").hidden = true;
+      $("clarify").hidden = false;
+      $("oneoff-meta").textContent = fresh
+        ? "Drawn at random from " + deckIds().length + " cards. That is the answer to this question today, and asking again will return the same card. You may draw one clarifier."
+        : "You already asked this today, so here is the same card again. The deck does not change its mind. You may draw one clarifier, or ask something else.";
+    }
+  }
+
+  $("ask").addEventListener("click", () => {
+    const qText = $("question").value.trim();
+    if (!qText){
+      $("oneoff-out").hidden = false;
+      $("oneoff-clarifier").hidden = true;
+      $("clarify").hidden = true;
+      $("oneoff-result").textContent = "Ask something first. The deck does not answer an empty question.";
+      $("oneoff-meta").textContent = "";
+      currentKey = null;
+      return;
+    }
+    const store = loadAnswers();
+    const key = normalise(qText) + "|" + todayKey();
+    const fresh = !store[key];
+    if (fresh){
+      const d = drawOne();
+      store[key] = { q:qText, id:d.id, rev:d.rev };
+      saveAnswers(store);
+    }
+    currentKey = key;
+    showAnswer(key, store, fresh);
+  });
+
+  $("clarify").addEventListener("click", () => {
+    if (!currentKey) return;
+    const store = loadAnswers();
+    if (!store[currentKey] || store[currentKey].clarifier) return;
+    store[currentKey].clarifier = drawOne();
+    saveAnswers(store);
+    showAnswer(currentKey, store, false);
   });
 
   const flash = (el, msg) => { el.textContent = msg; el.hidden = false; setTimeout(() => { el.hidden = true; }, 1900); };
