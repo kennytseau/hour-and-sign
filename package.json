@@ -1,0 +1,17 @@
+{
+  "name": "hour-and-sign",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A three-card reading cut by your birth date and the planetary hour you ask in.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy . --project-name hour-and-sign"
+  },
+  "dependencies": {
+    "workers-og": "0.0.25"
+  },
+  "devDependencies": {
+    "wrangler": "3.90.0"
+  }
+}

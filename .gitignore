@@ -1,0 +1,7 @@
+# Claude artifact preview build — regenerated, not part of the site
+preview.html
+
+.DS_Store
+Thumbs.db
+node_modules/
+.wrangler/

@@ -1,0 +1,11 @@
+# Normalise to LF in the repository and on checkout. The site is served from
+# Cloudflare's Linux edge, and _headers in particular is parsed line by line.
+* text=auto eol=lf
+
+# index.html is deliberately pure ASCII; keep git from touching its bytes
+# beyond line endings. See the Encoding section of README.md.
+*.html text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+_headers text eol=lf
+robots.txt text eol=lf
