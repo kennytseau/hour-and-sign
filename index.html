@@ -881,6 +881,57 @@ const SIGN_NATURE = {
   Pisces:      { feel:"whatever is in the room, whether it is yours or not", think:"in images", act:"when it finally becomes unbearable not to" }
 };
 
+/* ---- the parts a longer answer is built from ----
+   Rather than one line per card, each paragraph is assembled from things that
+   are actually true of the card: what its suit governs, where its number sits
+   in the sequence, whether it is early or late in the Major Arcana, and what
+   a reversal does to it. Every clause is checkable against the card, which is
+   what keeps the length from turning into padding. */
+const SUIT_DOMAIN = {
+  wands:     "Wands are the suit of drive and work, so this is about what you are spending your energy on, and whether you ever actually chose it",
+  cups:      "Cups are the suit of feeling, so this is about what you want and who you want it with, rather than what is sensible",
+  swords:    "Swords are the suit of thought and speech, so this is about what is being said, decided, or carefully not said",
+  pentacles: "Pentacles are the suit of money, work and the body, so this is about the material facts rather than how you feel about them"
+};
+const RANK_STAGE = [
+  "An Ace is the seed of the thing. Nothing has happened yet, which is precisely why it is all still possible",
+  "A Two is a decision with two options on the table, which usually means a third one has not been noticed yet",
+  "A Three is the first real evidence. Something you started has produced a result you can point at",
+  "A Four is a pause, and a pause is either rest or stalling. Only you know which one this is",
+  "A Five is where it gets difficult. Every Five in the deck is a loss or an argument, and every one of them is survivable",
+  "A Six is the recovery. The hard part has already happened, whether or not it feels finished",
+  "A Seven is the point where you hold your nerve without much evidence to go on",
+  "An Eight is movement, and usually faster movement than you are comfortable with",
+  "A Nine is nearly the end, which is the worst possible place to stop",
+  "A Ten is the end of the sequence. Whatever this was, it is complete, and completion is not always a reward",
+  "A Page is somebody new to this. Not young in years, young in experience, and it may well be you",
+  "A Knight is somebody moving at speed and not stopping to check the map",
+  "A Queen is somebody who has mastered this from the inside and does not feel the need to announce it",
+  "A King is somebody with authority over this, who may or may not be using it well"
+];
+const MAJOR_STAGE = [
+  "It is an early Major, from the part of the sequence about becoming rather than concluding",
+  "It sits in the middle of the Major Arcana, the stretch that is about endurance rather than excitement",
+  "It is a late Major, from the end of the sequence, where things get settled, broken open, or finished"
+];
+const majorStage = i => MAJOR_STAGE[i <= 7 ? 0 : (i <= 14 ? 1 : 2)];
+const TURN_LINE = {
+  rev:  "Reversed, it is the same thing with the brakes on: slower, blocked, or already happening somewhere you cannot see it",
+  good: "That is the good news, and the trouble with good news is that it goes off if you leave it on the side",
+  flat: "It is not good news or bad news. It is a condition, and conditions can be worked with",
+  hard: "That reads worse than it is going to be. Every difficult card in this deck describes something with an end to it"
+};
+/* Said once each. If both moving cards land in the same category, the second
+   one remarks on the pairing instead of repeating the sentence. */
+const TURN_REPEAT = {
+  rev:  "Reversed as well, so the brakes are on both of them at once",
+  good: "That is the second piece of good news in three cards, which is more than most spreads manage",
+  flat: "Also neutral, which makes this a spread about conditions rather than events",
+  hard: "Difficult as well. Two heavy cards in one spread is a lot, and both of them still have an end"
+};
+const HOUR_WINDOW = ["before this day is out", "in the next few hours", "by tonight", "before you go to bed"];
+const TURN_WINDOW = ["over the next week or two", "before the month turns", "within the fortnight", "in the next ten days or so"];
+
 /* One question to sit with, keyed to the suit of the closing card. This is
    the journal prompt a reading app would leave you with. */
 const SIT_WITH = {
@@ -1337,19 +1388,59 @@ function compose(ctx, cards, soul, rnd){
 
   /* 3. the cards */
   out.push('<h3>Your cards</h3>');
-  out.push("<p><strong>" + hc.card.name + "</strong>" + (hc.rev ? ", reversed," : "") + " is what is in front of you: " +
-    full(hc) + ". " +
-    (hc.card.major ? "A Major, so it is about the shape of things rather than an errand. "
-                   : "A " + hc.card.suitName + " card, so it is " + SUITS.find(s => s.key === hc.card.suit).of + " rather than anything grander. ") +
+  /* Two cards of the same suit, rank or Major stage would otherwise be handed
+     the identical sentence twice in one spread, so each line is used once and
+     the repeat becomes a remark about the repetition, which is what a reader
+     would actually say. */
+  const usedSuit = {}, usedRank = {}, usedStage = {};
+  const body = c => {
+    if (c.card.major){
+      const st = majorStage(c.idx);
+      if (usedStage[st]){
+        usedStage[st]++;
+        return usedStage[st] > 2
+          ? "All three come from the same stretch of the Major Arcana, which is rare enough to mean the spread is one idea rather than three. "
+          : "Another Major from the same stretch of the sequence, which is why the two of them rhyme. ";
+      }
+      usedStage[st] = 1;
+      return st + ". ";
+    }
+    let s = "";
+    if (usedSuit[c.card.suit]) s += "Another " + c.card.suitName + " card, which doubles that point rather than widening it. ";
+    else { s += SUIT_DOMAIN[c.card.suit] + ". "; usedSuit[c.card.suit] = true; }
+    if (usedRank[c.card.rank]) s += "A second " + RANKS[c.card.rank] + " in a three card spread, which is rarer than it looks and worth noticing. ";
+    else { s += RANK_STAGE[c.card.rank] + ". "; usedRank[c.card.rank] = true; }
+    return s;
+  };
+  const usedTurn = {};
+  const turnOf = c => {
+    const k = c.rev ? "rev" : (c.card.tone > 0 ? "good" : (c.card.tone === 0 ? "flat" : "hard"));
+    const line = usedTurn[k] ? TURN_REPEAT[k] : TURN_LINE[k];
+    usedTurn[k] = true;
+    return line + ". ";
+  };
+
+  out.push("<p><strong>" + hc.card.name + "</strong>" + (hc.rev ? ", reversed," : "") +
+    " is what is in front of you, and it reads as " + full(hc) + ". " + body(hc) + turnOf(hc) +
+    "Watch for it " + pick(rnd, HOUR_WINDOW) + ", because the hour card is the one with the shortest fuse: it is describing the stretch of today you are standing in, not the week. " +
     '<span class="said">' + hc.card.voice + "</span></p>");
 
-  out.push("<p><strong>" + sc.card.name + "</strong> is you: " + full(sc) +
-    ". It is the thing you keep doing whether or not you meant to. " +
-    (soul !== sc.idx ? "Underneath it sits <strong>" + DECK[soul].name + "</strong>, the quieter engine. " : "") +
+  out.push("<p><strong>" + sc.card.name + "</strong> is you, and it does not move: " + full(sc) + ". " +
+    body(sc) + "You have been doing this since before you had words for it, which is why it reads as personality rather than choice. " +
+    (soul !== sc.idx ? "Reduce the arithmetic one step further and <strong>" + DECK[soul].name +
+      "</strong> sits underneath it, quieter and harder to argue with. " : "") +
+    (sc.card.tone > 0
+      ? "The cost of a strength like that is that people stop offering to help with it, because you have never once looked like you needed help. "
+      : sc.card.tone === 0
+        ? "The cost is that you mistake the habit for your character, and then defend it as though it were. "
+        : "The cost is that you assume everybody carries this around, and most people do not. ") +
     '<span class="said">' + sc.card.voice + "</span></p>");
 
-  out.push("<p><strong>" + tc.card.name + "</strong>" + (tc.rev ? ", reversed," : "") + " is where it is going: " +
-    full(tc) + ". " +
+  out.push("<p><strong>" + tc.card.name + "</strong>" + (tc.rev ? ", reversed," : "") +
+    " is where this is going: " + full(tc) + ". " + body(tc) + turnOf(tc) +
+    "This one holds its face all day, so give it " + pick(rnd, TURN_WINDOW) +
+    " before deciding it was wrong. The moon is " + (moon.dir === "full" ? "full, which will make it feel more urgent than it is"
+      : moon.dir === "waxing" ? "still growing, which is on its side" : "shrinking, so this will arrive quietly if it arrives at all") + ". " +
     '<span class="said">' + tc.card.voice + "</span></p>");
 
   /* how the three cards sit with each other, still under Your cards */
