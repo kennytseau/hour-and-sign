@@ -41,20 +41,28 @@ export async function onRequest(context){
   const response = await next();
 
   const type = response.headers.get("content-type") || "";
-  if (!type.includes("text/html") || !VALID_DATE.test(b)) return response;
+  if (!type.includes("text/html")) return response;
 
   const [y, m, d] = b.split("-").map(Number);
-  if (!y || !m || !d || m > 12 || d > 31) return response;
+  const personal = VALID_DATE.test(b) && y && m && d && m <= 12 && d <= 31;
 
   const name = (url.searchParams.get("n") || "").slice(0, 24).replace(/[<>"]/g, "");
-  const sign = signFor(m, d);
-
   const img = new URL("/og", url.origin);
-  img.searchParams.set("b", b);
-  if (name) img.searchParams.set("n", name);
+  let title, desc;
 
-  const title = name ? `${name}'s reading · Hour & Sign` : `A ${sign} reading · Hour & Sign`;
-  const desc = "Three cards from a full 78-card deck, cut by a birth date and the planetary hour. Draw your own.";
+  if (personal){
+    const sign = signFor(m, d);
+    img.searchParams.set("b", b);
+    if (name) img.searchParams.set("n", name);
+    title = name ? `${name}'s reading · Hour & Sign` : `A ${sign} reading · Hour & Sign`;
+    desc = "Three cards from a full 78-card deck, cut by a birth date and the planetary hour. Draw your own.";
+  } else {
+    /* Still rewrite the plain homepage: the HTML ships relative URLs, and
+       several crawlers (Twitter among them) will not resolve a relative
+       og:image. The homepage is the link most people actually share. */
+    title = "Hour & Sign";
+    desc = "A three-card reading cut by your birth date and the planetary hour you ask in.";
+  }
 
   return new HTMLRewriter()
     .on('meta[property^="og:"], meta[name^="twitter:"]', new MetaRewriter({
