@@ -254,9 +254,12 @@ button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--g
 .spread{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 @media (max-width:620px){.spread{grid-template-columns:1fr;gap:1.6rem}}
 .slot{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+/* Two lines are reserved whether or not the label needs them, so a note that
+   wraps cannot push its card below the others. */
 .slot-label{
   font-family:var(--font-label); font-size:.72rem; font-weight:600; letter-spacing:.18em;
-  text-transform:uppercase; display:flex; justify-content:space-between; gap:.5rem; color:var(--bone-dim);
+  text-transform:uppercase; display:flex; justify-content:space-between; gap:.5rem;
+  color:var(--bone-dim); align-items:flex-start; min-height:2.8em; line-height:1.35;
 }
 .slot-label b{color:var(--gold);font-weight:700}
 .card{position:relative;aspect-ratio:2/3;max-width:100%;perspective:1200px}
@@ -298,7 +301,7 @@ button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--g
   font-family:var(--font-label); font-size:.72rem; font-weight:400; letter-spacing:.06em;
   color:var(--bone-dim); margin:.3rem 0 0; line-height:1.5;
 }
-.slot-note{font-family:var(--font-label);font-size:.76rem;color:var(--bone-dim);margin:0;line-height:1.6}
+.slot-note{font-family:var(--font-label);font-size:.76rem;color:var(--bone-dim);margin:0;line-height:1.6;min-height:2.4em}
 .reassure{
   font-size:.95rem; line-height:1.65; margin:0; color:var(--bone);
   border-left:2px solid var(--spectre); padding:.1rem 0 .1rem .75rem;
@@ -306,6 +309,39 @@ button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--g
 .reassure b{
   display:block; font-family:var(--font-label); font-size:.7rem; letter-spacing:.18em;
   text-transform:uppercase; color:var(--spectre); font-weight:700; margin-bottom:.2rem;
+}
+
+/* ---- turning the cards ---- */
+.turn-row{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-top:1.4rem}
+.turn-hint{font-family:var(--font-label);font-size:.8rem;letter-spacing:.06em;color:var(--bone-dim)}
+.reading-wait{
+  font-family:var(--font-label); font-size:.85rem; letter-spacing:.08em; color:var(--bone-dim);
+  border:1px dashed var(--rule); padding:1.1rem; margin:0;
+}
+
+/* ---- the takeaway ---- */
+.takeaway{
+  border:1px solid var(--gold); background:rgba(224,165,63,.05);
+  padding:1.4rem 1.4rem 1.2rem; margin-bottom:2.4rem; position:relative;
+}
+.takeaway-label{
+  display:block; font-family:var(--font-label); font-size:.72rem; font-weight:700;
+  letter-spacing:.24em; text-transform:uppercase; color:var(--gold); margin-bottom:.7rem;
+}
+.takeaway-line{
+  font-family:var(--font-display); font-size:clamp(1.3rem,3.6vw,1.75rem); line-height:1.3;
+  font-weight:700; color:var(--bone); margin:0 0 1.3rem; text-wrap:balance; max-width:22ch;
+}
+.takeaway-grid{display:grid;gap:.9rem;margin:0}
+@media (min-width:640px){.takeaway-grid{grid-template-columns:1fr 1fr;gap:1rem 1.6rem}}
+.takeaway-grid dt{
+  font-family:var(--font-label); font-size:.68rem; font-weight:700; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--spectre); margin-bottom:.15rem;
+}
+.takeaway-grid dd{margin:0;font-size:1rem;line-height:1.6;color:var(--bone)}
+.takeaway-more{
+  font-family:var(--font-label); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--bone-dim); margin:1.3rem 0 0; padding-top:.9rem; border-top:1px solid var(--rule-soft);
 }
 
 /* ---- the reading ---- */
@@ -471,6 +507,8 @@ footer b{color:var(--gold);font-weight:600}
           <dd>An old system giving every hour of the day a ruling planet, cycling in a fixed order. It is why Sunday is the Sun's day and Monday is the Moon's.</dd>
           <dt>The frightening looking cards</dt>
           <dd>Death, The Tower, The Devil and the Three of Swords alarm nearly everyone on a first reading. None of them is literal. They are about endings, sudden clarity, habits and plain old heartbreak, and each says so on the card itself. Nothing has been removed from this deck to spare you.</dd>
+          <dt>The three positions</dt>
+          <dd>The Hour, The Sign and The Turning are this page's own names, not traditional ones. A standard three card spread is usually Past, Present and Future, or Situation, Action and Outcome. What is traditional here is the card meanings, the reversals, the elemental dignities and the birth card arithmetic, which is Mary Greer's method. The spread itself is particular to this deck, because it is built around the hour rather than around a story.</dd>
           <dt>Asking twice</dt>
           <dd>You get one card per question, once a day. Dealing again and again on the same question until the answer improves is the one thing every reader will tell you not to do, so the page simply will not let you. You may draw a single clarifier, which is allowed, and then that question is closed until tomorrow.</dd>
           <dt>How exact is any of this?</dt>
@@ -556,9 +594,13 @@ footer b{color:var(--gold);font-weight:600}
   <section class="sec" aria-labelledby="h-spread">
     <div class="sec-head">
       <h2 id="h-spread">The spread</h2>
-      <span class="note">Tap a card to turn it back over</span>
+      <span class="note" id="spread-note">Turn them one at a time</span>
     </div>
     <div class="spread" id="spread"></div>
+    <div class="turn-row">
+      <button type="button" id="turn-next">Turn the Hour</button>
+      <span class="turn-hint" id="turn-hint">Three cards, turned in order.</span>
+    </div>
   </section>
 
   <section class="sec" aria-labelledby="h-reading">
@@ -567,6 +609,7 @@ footer b{color:var(--gold);font-weight:600}
       <span class="note" id="reading-stamp">...</span>
     </div>
     <div class="reading" id="reading" aria-live="polite"></div>
+    <p class="reading-wait" id="reading-wait">The reading appears once all three cards are face up.</p>
 
     <div class="oneoff">
       <h3>Ask the deck one question</h3>
@@ -793,6 +836,38 @@ const ELEMENTS = {
   Air:   { verb:"quick and sideways", grain:"talk it into shape",   kin:"signal", suit:"swords" },
   Water: { verb:"deep and tidal",     grain:"let it rise and fall", kin:"tide",   suit:"cups" }
 };
+/* "an Aries", "an Earth sign", "an Ox year". Sign names and elements are
+   interpolated in several places and three of them start with a vowel. */
+const indef = w => (/^[aeiou]/i.test(String(w)) ? "an" : "a");
+
+/* How each sign feels, thinks and acts. Three short clauses rather than one
+   long characterisation, because the useful question is not "what are you
+   like" but "what will you do with this". */
+const SIGN_NATURE = {
+  Aries:       { feel:"fast and hot, and it passes as quickly as it arrives", think:"in straight lines", act:"before the meeting has finished" },
+  Taurus:      { feel:"slowly, and then permanently", think:"in terms of what it will cost", act:"once, properly, and not again" },
+  Gemini:      { feel:"two things at once and mean both", think:"out loud, whether or not anyone is there", act:"on whichever version is nearer" },
+  Cancer:      { feel:"everything, and show about a third of it", think:"about who it lands on", act:"to protect, usually somebody else" },
+  Leo:         { feel:"generously and in public", think:"about how it will look later", act:"as though it matters, because to you it does" },
+  Virgo:       { feel:"privately, once you have sorted it into order", think:"in corrections", act:"by fixing the nearest broken thing" },
+  Libra:       { feel:"other people's moods before your own", think:"by weighing, endlessly", act:"late, but fairly" },
+  Scorpio:     { feel:"at full depth or not at all", think:"about what is underneath it", act:"slowly, and then completely" },
+  Sagittarius: { feel:"best while moving", think:"in possibilities rather than steps", act:"on the larger option" },
+  Capricorn:   { feel:"later, when there is time set aside for it", think:"in steps and deadlines", act:"on schedule, whatever the mood" },
+  Aquarius:    { feel:"at one remove, and analyse it afterwards", think:"sideways, and usually first", act:"on principle, even when it costs you" },
+  Pisces:      { feel:"whatever is in the room, whether it is yours or not", think:"in images", act:"when it finally becomes unbearable not to" }
+};
+
+/* One question to sit with, keyed to the suit of the closing card. This is
+   the journal prompt a reading app would leave you with. */
+const SIT_WITH = {
+  major:     "Where in your life is this actually happening, in plain terms, with names and dates?",
+  wands:     "What are you putting energy into that you did not actually choose?",
+  cups:      "What are you feeling at the moment that you have not said to anyone?",
+  swords:    "What do you already know, and keep deciding not to act on?",
+  pentacles: "What would make tomorrow materially easier, and why have you not done it?"
+};
+
 /* What a season pushes on everybody, which is a different thing from what a
    sign is like natally. Kept separate so the horoscope section cannot repeat
    the star sign section's wording when the sun happens to be in your sign. */
@@ -962,10 +1037,13 @@ function weightedOrder(ids, w, rnd){
 }
 
 /* ============ the draw ============ */
+/* The position names are this deck's own. Traditional three card spreads use
+   Past, Present, Future, or Situation, Action, Outcome; the nearest standard
+   terms are given alongside so nobody is misled about which part is old. */
 const SLOTS = [
-  { label:"The Hour",    note:"now",      intent:"What this stretch of the day is handing you" },
-  { label:"The Sign",    note:"standing", intent:"The shape you keep returning to" },
-  { label:"The Turning", note:"today",    intent:"What is moving underneath" }
+  { label:"The Hour",    note:"the situation", intent:"What is in front of you now" },
+  { label:"The Sign",    note:"you",           intent:"Your birth card, fixed for life" },
+  { label:"The Turning", note:"where it goes", intent:"What is moving underneath" }
 ];
 /* 1st, 2nd, 3rd, 4th ... 21st, 22nd. The naive version said "21th hour". */
 function ordinal(n){
@@ -1144,22 +1222,22 @@ function compose(ctx, cards, soul, rnd){
   const seasonSign = signFor(now.getMonth() + 1, now.getDate());
   const out = [];
 
-  /* 1. star sign: the part of you that never moves */
+  /* 1. star sign: feel, think, act, and what the hour does to each */
+  const nat = SIGN_NATURE[sign.name];
   out.push('<h3>Your star sign</h3>');
-  out.push('<p class="lead">' + who + " " + (name ? "is" : "are") + " a <strong>" + sign.name +
-    "</strong> sun, " + sign.trait + ".</p>");
-  out.push("<p>That puts you under " + sign.ruler + ", in the element of " + sign.el + ", which runs " + el.verb +
-    ". Your default move, when nothing else is pressing, is to " + el.grain + ". " +
-    (!rising
-      ? "No birth hour given, so there is no rising sign here. Add one above and you get the mask as well as the face."
-      : rising.name === sign.name
-        ? "You were born close enough to sunrise that <strong>" + rising.name +
-          "</strong> is rising as well as sitting. That doubles it rather than disguising it, so what people meet first is simply more of the same."
-        : "With <strong>" + rising.name + "</strong> rising, that is not the version people meet first. They get " +
-          rising.trait + ", and have to stay a while to find the " + sign.name + " underneath.") +
-    " You were born in a <strong>" + animal + "</strong> year, which mostly means " +
-    pick(rnd, ["you will get away with it", "people underestimate your timing", "stubbornness counts as a strategy here", "you are owed a favour somewhere"]) + ".</p>");
-  out.push("<p>None of that changes. It is the fixed part, and everything below is weather blowing across it.</p>");
+  out.push("<p>You are " + indef(sign.name) + " <strong>" + sign.name + "</strong> sun. You feel " + nat.feel +
+    ". You think " + nat.think + ". You act " + nat.act + ".</p>");
+  out.push("<p>" + (rising
+      ? (rising.name === sign.name
+          ? "<strong>" + rising.name + "</strong> is rising as well, so people get that undiluted."
+          : "<strong>" + rising.name + "</strong> is rising, so people meet that first and find the " + sign.name + " later.")
+      : "Add a birth hour above and you get your rising sign too, which is the version people meet first.") +
+    " That is the fixed part. What moves is the hour: <strong>" + art(ph.ruler) + "</strong> has this one, " +
+    (ph.ruler === "Mars" || ph.ruler === "Sun" ? "which pushes you to act before you have finished feeling."
+      : ph.ruler === "Mercury" || ph.ruler === "Jupiter" ? "which pushes the thinking ahead of the feeling."
+      : ph.ruler === "Moon" || ph.ruler === "Venus" ? "which pushes the feeling ahead of the thinking."
+      : "which slows all three of them down.") +
+    " In three hours a different planet takes over and the balance shifts again.</p>");
 
   /* 2. horoscope: the sky as it is right now */
   out.push('<h3>Your horoscope</h3>');
@@ -1182,22 +1260,19 @@ function compose(ctx, cards, soul, rnd){
 
   /* 3. the cards */
   out.push('<h3>Your cards</h3>');
-  out.push("<p><strong>" + hc.card.name + "</strong>" + (hc.rev ? ", reversed," : "") + " sits in the hour. " +
-    "This is the card for this stretch of the day only, dealt off the hand your deck was shuffled into at midnight, and it will be a different one when the watch turns. " +
-    "It reads as " + full(hc) + ". " +
-    (hc.card.major ? "Being a Major, it is talking about the shape of things rather than an errand. "
-                   : "It is a " + hc.card.suitName + " card, so it is pointing at " + SUITS.find(s => s.key === hc.card.suit).of + " rather than anything grander. ") +
+  out.push("<p><strong>" + hc.card.name + "</strong>" + (hc.rev ? ", reversed," : "") + " is what is in front of you: " +
+    full(hc) + ". " +
+    (hc.card.major ? "A Major, so it is about the shape of things rather than an errand. "
+                   : "A " + hc.card.suitName + " card, so it is " + SUITS.find(s => s.key === hc.card.suit).of + " rather than anything grander. ") +
     '<span class="said">' + hc.card.voice + "</span></p>");
 
-  out.push("<p><strong>" + sc.card.name + "</strong> is your standing card, and unlike the other two it never moves. " +
-    "It comes out of the arithmetic of your birth date rather than any shuffle, which is why readers call it a birth or personality card. " +
-    "It reads as " + full(sc) + ", and it is the thing you keep doing whether or not you meant to. " +
-    (soul !== sc.idx ? "Reduce it once more and you get <strong>" + DECK[soul].name + "</strong>, the quieter engine underneath the obvious one. " : "It reduces to itself, which is unusual and makes it louder than most. ") +
+  out.push("<p><strong>" + sc.card.name + "</strong> is you: " + full(sc) +
+    ". It is the thing you keep doing whether or not you meant to. " +
+    (soul !== sc.idx ? "Underneath it sits <strong>" + DECK[soul].name + "</strong>, the quieter engine. " : "") +
     '<span class="said">' + sc.card.voice + "</span></p>");
 
-  out.push("<p><strong>" + tc.card.name + "</strong>" + (tc.rev ? ", reversed," : "") + " is the turning, drawn from what the eight watches left behind and weighted by the season rather than the hour. " +
-    "It holds its face and its orientation all day, so this one is today's news rather than this afternoon's. " +
-    "It reads as " + full(tc) + ". " +
+  out.push("<p><strong>" + tc.card.name + "</strong>" + (tc.rev ? ", reversed," : "") + " is where it is going: " +
+    full(tc) + ". " +
     '<span class="said">' + tc.card.voice + "</span></p>");
 
   /* how the three cards sit with each other, still under Your cards */
@@ -1253,7 +1328,7 @@ function compose(ctx, cards, soul, rnd){
   const sameEl = minors.filter(c => c.card.el === sign.el);
   const oppEl = minors.filter(c => DIGNITY[sign.el][c.card.el] === "opposed");
   if (sameEl.length){
-    links.push("You are a <strong>" + sign.el + "</strong> sign, and " +
+    links.push("You are " + indef(sign.el) + " <strong>" + sign.el + "</strong> sign, and " +
       (sameEl.length > 1 ? "two of the cards are " : "one of the cards is ") +
       sameEl.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") + ", " + sign.el +
       " as well. The deck has handed you your own element, so whatever it is asking for should feel natural rather than effortful.");
@@ -1372,7 +1447,29 @@ function compose(ctx, cards, soul, rnd){
   const counsel = pick(rnd, counselBank[sign.el]) + " " + planet.do + (rx.active ? " And read it twice before you send it." : "");
   out.push('<div class="counsel"><span>What to actually do</span>' + counsel + "</div>");
 
-  return { html:out.join(""), counsel };
+  /* The takeaway, pinned to the top. Somebody who reads only this should still
+     walk away with something: a line, a theme, one thing to do, one thing to
+     avoid, and a question. Everything in it is already derived above. */
+  const dont = score(heavy) < 0
+    ? (heavy.rev ? "Carry on as though " + heavy.card.name + " were not on the table." : "Act on " + heavy.card.name + " before it has finished happening.")
+    : "Agree to one more thing than you can carry.";
+  const sitWith = SIT_WITH[tc.card.major ? "major" : tc.card.suit];
+  const theme = kw(hc).charAt(0).toUpperCase() + kw(hc).slice(1);
+
+  const takeaway =
+    '<div class="takeaway">' +
+      '<span class="takeaway-label">Today, in one line</span>' +
+      '<p class="takeaway-line">' + hc.card.voice + "</p>" +
+      '<dl class="takeaway-grid">' +
+        "<div><dt>Theme</dt><dd>" + theme + "</dd></div>" +
+        "<div><dt>Do</dt><dd>" + counsel + "</dd></div>" +
+        "<div><dt>Do not</dt><dd>" + dont + "</dd></div>" +
+        "<div><dt>Sit with</dt><dd>" + sitWith + "</dd></div>" +
+      "</dl>" +
+      '<p class="takeaway-more">The long version follows, if you want it.</p>' +
+    "</div>";
+
+  return { html:takeaway + out.join(""), counsel };
 }
 
 function weather(cards, rnd){
@@ -1390,7 +1487,32 @@ function weather(cards, rnd){
 /* ============ render ============ */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
-let LAST = null;
+let LAST = null, TURNED = 0, PENDING_READING = "";
+
+function updateTurnControl(){
+  const btn = $("turn-next"), hint = $("turn-hint");
+  if (TURNED >= SLOTS.length){
+    btn.hidden = true;
+    hint.textContent = "All three are face up. Tap any card to turn it back.";
+  } else {
+    btn.hidden = false;
+    btn.textContent = "Turn " + SLOTS[TURNED].label.replace(/^The /, "the ");
+    hint.textContent = SLOTS[TURNED].intent + ".";
+  }
+}
+function turnNext(){
+  const els = [...document.querySelectorAll(".card")];
+  if (TURNED >= els.length) return;
+  els[TURNED].classList.add("flipped");
+  TURNED++;
+  updateTurnControl();
+  if (TURNED === els.length){
+    $("reading").innerHTML = PENDING_READING;
+    $("reading-wait").hidden = true;
+    /* once everything is face up, let people flip cards back to look again */
+    els.forEach(el => { el.onclick = () => el.classList.toggle("flipped"); });
+  }
+}
 
 function render(opts){
   const { bdate, bhour, name, revRate, deckSize, weighted, isExample } = opts;
@@ -1460,14 +1582,19 @@ function render(opts){
       "</div>";
   }).join("");
 
+  /* Turned one at a time, in order, rather than dealt all at once. The
+     reading is held back until the third is face up. */
+  TURNED = 0;
+  PENDING_READING = read.html;
+  $("reading").innerHTML = "";
+  $("reading-wait").hidden = false;
   [...document.querySelectorAll(".card")].forEach((el, n) => {
-    setTimeout(() => el.classList.add("flipped"), 200 + n * 280);
-    const toggle = () => el.classList.toggle("flipped");
-    el.addEventListener("click", toggle);
-    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(); } });
+    el.addEventListener("click", () => { if (n === TURNED) turnNext(); });
+    el.addEventListener("keydown", e => {
+      if ((e.key === "Enter" || e.key === " ") && n === TURNED){ e.preventDefault(); turnNext(); }
+    });
   });
-
-  $("reading").innerHTML = read.html;
+  updateTurnControl();
   $("reading-stamp").textContent = "sealed for " + watch.name.toLowerCase();
 
   $("dials").innerHTML = wx.map(d =>
@@ -1571,10 +1698,17 @@ function tickCountdown(){
   ["revmode","deckmode","weightmode"].forEach(id =>
     $(id).addEventListener("change", () => { if ($("example-flag").hidden) apply(false); }));
 
+  $("turn-next").addEventListener("click", turnNext);
+
+  /* Put them face down again and turn them one at a time. The cards do not
+     change: it is the same spread until the hour turns. */
   $("reshuffle").addEventListener("click", () => {
-    document.querySelectorAll(".card").forEach(c => c.classList.remove("flipped"));
-    setTimeout(() => document.querySelectorAll(".card").forEach((c, n) =>
-      setTimeout(() => c.classList.add("flipped"), n * 280)), 450);
+    document.querySelectorAll(".card").forEach(c => { c.classList.remove("flipped"); c.onclick = null; });
+    TURNED = 0;
+    $("reading").innerHTML = "";
+    $("reading-wait").hidden = false;
+    updateTurnControl();
+    $("h-spread").scrollIntoView({ behavior:"smooth", block:"start" });
   });
 
   /* One question, one card, once a day.
