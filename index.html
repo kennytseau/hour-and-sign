@@ -202,6 +202,7 @@ table.odds td.mult{color:var(--spectre);font-weight:700;white-space:nowrap;font-
   text-transform:uppercase; color:var(--gold); line-height:1.3;
 }
 .field label i{font-style:normal;color:var(--bone-dim);font-weight:400;letter-spacing:.1em}
+.field-wide{grid-column:1 / -1}
 .field input,.field select{
   font-family:var(--font-label); font-size:1rem; font-weight:400; color:var(--bone);
   background:var(--void); border:1px solid var(--rule); border-radius:0;
@@ -302,14 +303,34 @@ button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--g
   color:var(--bone-dim); margin:.3rem 0 0; line-height:1.5;
 }
 .slot-note{font-family:var(--font-label);font-size:.76rem;color:var(--bone-dim);margin:0;line-height:1.6;min-height:2.4em}
-.reassure{
-  font-size:.95rem; line-height:1.65; margin:0; color:var(--bone);
-  border-left:2px solid var(--spectre); padding:.1rem 0 .1rem .75rem;
+/* ---- choosing your cards ---- */
+.asked{
+  font-size:1.05rem; color:var(--bone-dim); margin:0 0 1.2rem;
+  border-left:2px solid var(--spectre); padding-left:.9rem;
 }
-.reassure b{
-  display:block; font-family:var(--font-label); font-size:.7rem; letter-spacing:.18em;
-  text-transform:uppercase; color:var(--spectre); font-weight:700; margin-bottom:.2rem;
+.asked strong{color:var(--bone);font-weight:600}
+.pick-row{margin-top:1.6rem}
+.pick-prompt{
+  font-family:var(--font-label); font-size:.86rem; letter-spacing:.08em;
+  color:var(--gold); margin:0 0 1rem;
 }
+.fan{display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;margin:0 0 1.2rem}
+.fan-card{
+  width:clamp(38px,8vw,52px); aspect-ratio:2/3; padding:0; border:1px solid var(--rule);
+  background:var(--dusk-3); color:var(--gold); cursor:pointer; border-radius:0;
+  display:grid; place-items:center; font-size:.8rem; height:auto;
+  transform:rotate(var(--tilt,0deg));
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  box-shadow:inset 0 0 18px rgba(0,0,0,.5);
+  background-image:radial-gradient(var(--rule) 1px, transparent 1px); background-size:9px 9px;
+}
+.fan-card:hover:not(:disabled){
+  transform:rotate(var(--tilt,0deg)) translateY(-8px);
+  border-color:var(--gold); box-shadow:0 0 18px rgba(224,165,63,.25);
+}
+.fan-card:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.fan-card.taken{opacity:.2;cursor:default}
+.fan-card:disabled{cursor:default}
 
 /* ---- turning the cards ---- */
 .turn-row{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-top:1.4rem}
@@ -506,7 +527,7 @@ footer b{color:var(--gold);font-weight:600}
           <dt>Planetary hour</dt>
           <dd>An old system giving every hour of the day a ruling planet, cycling in a fixed order. It is why Sunday is the Sun's day and Monday is the Moon's.</dd>
           <dt>The frightening looking cards</dt>
-          <dd>Death, The Tower, The Devil and the Three of Swords alarm nearly everyone on a first reading. None of them is literal. They are about endings, sudden clarity, habits and plain old heartbreak, and each says so on the card itself. Nothing has been removed from this deck to spare you.</dd>
+          <dd>Death, The Tower, The Devil and the Three of Swords alarm nearly everyone on a first reading. None of them is literal. Death is change, The Tower is sudden clarity, The Devil is the habit you know you are in, and the Three of Swords is ordinary heartbreak. Nothing has been removed from this deck to spare you.</dd>
           <dt>The three positions</dt>
           <dd>The Hour, The Sign and The Turning are this page's own names, not traditional ones. A standard three card spread is usually Past, Present and Future, or Situation, Action and Outcome. What is traditional here is the card meanings, the reversals, the elemental dignities and the birth card arithmetic, which is Mary Greer's method. The spread itself is particular to this deck, because it is built around the hour rather than around a story.</dd>
           <dt>Asking twice</dt>
@@ -541,9 +562,13 @@ footer b{color:var(--gold);font-weight:600}
             <label for="bname">Name <i>optional</i></label>
             <input type="text" id="bname" name="bname" maxlength="24" placeholder="For the heading">
           </div>
+          <div class="field field-wide">
+            <label for="question">What are you asking? <i>the deck would rather you had something in mind</i></label>
+            <input type="text" id="question" maxlength="90" placeholder="Should I send the email?">
+          </div>
         </div>
         <div class="form-actions">
-          <button type="submit" id="draw">Draw three</button>
+          <button type="submit" id="draw">Draw cards</button>
           <span class="toast" id="toast" hidden>Copied</span>
         </div>
       </form>
@@ -594,12 +619,14 @@ footer b{color:var(--gold);font-weight:600}
   <section class="sec" aria-labelledby="h-spread">
     <div class="sec-head">
       <h2 id="h-spread">The spread</h2>
-      <span class="note" id="spread-note">Turn them one at a time</span>
+      <span class="note" id="spread-note">Pick your own</span>
     </div>
+    <p class="asked" id="asked" hidden></p>
     <div class="spread" id="spread"></div>
-    <div class="turn-row">
-      <button type="button" id="turn-next">Turn the Hour</button>
-      <span class="turn-hint" id="turn-hint">Three cards, turned in order.</span>
+    <div class="pick-row">
+      <p class="pick-prompt" id="pick-prompt">Pick a card for the Hour.</p>
+      <div class="fan" id="fan"></div>
+      <button type="button" class="ghost" id="repick" hidden>Start the choosing again</button>
     </div>
   </section>
 
@@ -611,19 +638,11 @@ footer b{color:var(--gold);font-weight:600}
     <div class="reading" id="reading" aria-live="polite"></div>
     <p class="reading-wait" id="reading-wait">The reading appears once all three cards are face up.</p>
 
-    <div class="oneoff">
-      <h3>Ask the deck one question</h3>
-      <p class="oneoff-rule">One question, one card, once a day. Ask something else if you like, but you cannot ask the same thing twice and keep dealing until you get the answer you wanted. That is the oldest rule at the table.</p>
-      <div class="row">
-        <input type="text" id="question" maxlength="90" placeholder="Should I send the email?" aria-label="Your question">
-        <button type="button" id="ask">Ask</button>
-      </div>
-      <div id="oneoff-out" hidden>
-        <p class="result" id="oneoff-result"></p>
-        <p class="result" id="oneoff-clarifier" hidden></p>
-        <p class="meta" id="oneoff-meta"></p>
-        <button type="button" class="ghost" id="clarify" hidden>Draw one clarifier</button>
-      </div>
+    <div class="oneoff" id="clarifier-box" hidden>
+      <h3>Still not clear?</h3>
+      <p class="oneoff-rule">One clarifier is allowed, and only one. After that the question is closed until the hour turns, because dealing until the answer improves is the one thing every reader will tell you not to do.</p>
+      <button type="button" class="ghost" id="clarify">Draw one clarifier</button>
+      <p class="result" id="clarifier-out" hidden></p>
     </div>
   </section>
 
@@ -637,7 +656,6 @@ footer b{color:var(--gold);font-weight:600}
     <div class="actions">
       <button type="button" class="ghost" id="copy">Copy reading</button>
       <button type="button" class="ghost" id="share">Copy share link</button>
-      <button type="button" class="ghost" id="reshuffle">Turn the cards again</button>
       <span class="toast" id="toast2" hidden>Copied</span>
     </div>
   </section>
@@ -1051,51 +1069,48 @@ function ordinal(n){
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-function drawSpread(ctx){
-  const { bY, bM, bD, bHour, now, wb, moon, revRate, deckSize } = ctx;
+/* How many face down cards are laid out to choose from. */
+const FAN_SIZE = 12;
+const normaliseQ = q => String(q || "").toLowerCase().replace(/[^a-z0-9 ]+/g, "").replace(/\s+/g, " ").trim();
+
+/* The deck is cut once for this person, this question and this hour. Which
+   cards come out of it is the reader's choice, not the machine's, so the
+   shuffle is seeded and the pick is free. Asking the same thing again in the
+   same hour gets the same cut, which is what stops the question being dealt
+   over and over until the answer improves. */
+function buildPool(ctx){
+  const { bY, bM, bD, bHour, now, wb, deckSize, question } = ctx;
   const birthKey = bY + "-" + bM + "-" + bD + "-" + bHour;
   const dayKey = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
-  const personality = birthCards(bY, bM, bD).personality;
-  const soul = birthCards(bY, bM, bD).soul;
+  const qKey = normaliseQ(question);
+  const { personality, soul } = birthCards(bY, bM, bD);
 
   const all = (deckSize === 22 ? MAJOR_IDS : DECK.map(c => c.id)).filter(id => id !== personality);
-
-  const rDay = rngFrom("day|" + birthKey + "|" + dayKey);
-  let pool = all.slice();
-  const hand = [];
-  let hourW = { reasons:[] };
-  for (let b = 0; b < 8; b++){
-    const atWatch = new Date(now.getFullYear(), now.getMonth(), now.getDate(), b * 3);
-    const wctx = { ...ctx, ph:planetaryHour(atWatch) };
-    const ww = deckWeights(pool, wctx, "hour");
-    if (b === wb) hourW = ww;
-    const id = weightedOrder(pool, ww.w, rDay)[0];
-    hand.push(id);
-    pool = pool.filter(x => x !== id);
-  }
-  const iHour = hand[wb];
-
-  const turnW = deckWeights(pool, ctx, "turn");
-  const rTurn = rngFrom("turn|" + birthKey + "|" + dayKey + "|" + moon.idx + "|" + signFor(now.getMonth() + 1, now.getDate()).name);
-  const iTurn = weightedOrder(pool, turnW.w, rTurn)[0];
-
-  const rxBonus = ctx.rx.active ? 0.10 : 0;
-  const effRate = revRate === 0 ? 0 : Math.min(0.95, revRate + rxBonus);
-  const rRevHour = rngFrom("rev-hour|" + birthKey + "|" + dayKey + "|" + wb);
-  const rRevDay  = rngFrom("rev-day|" + birthKey + "|" + dayKey);
-
-  const cards = [
-    { slot:SLOTS[0], idx:iHour,       rev:rRevHour() < effRate },
-    { slot:SLOTS[1], idx:personality, rev:false },
-    { slot:SLOTS[2], idx:iTurn,       rev:rRevDay() < effRate }
-  ].map(c => ({ ...c, card:DECK[c.idx] }));
+  const w = deckWeights(all, ctx, "hour");
+  const order = weightedOrder(all, w.w, rngFrom("cut|" + birthKey + "|" + dayKey + "|" + wb + "|" + qKey));
 
   return {
-    cards, soul, effRate,
-    reasons:hourW.reasons.concat(turnW.reasons.filter(r => !hourW.reasons.some(h => h.why === r.why))),
-    rnd:rngFrom("weather|" + birthKey + "|" + dayKey + "|" + wb),
-    seeds:{ birthKey, dayKey, wb, deckSize:all.length + 1 }
+    order, personality, soul, reasons:w.reasons,
+    key: birthKey + "|" + dayKey + "|" + wb + "|" + qKey,
+    /* a seed rather than a generator, so every repaint starts from the same
+       place and the wording does not drift when the spread is redrawn */
+    rndSeed: "weather|" + birthKey + "|" + dayKey + "|" + wb + "|" + qKey,
+    deckSize: all.length + 1
   };
+}
+
+/* Turn the two chosen positions in the cut, plus the birth card, into a spread. */
+function buildSpread(ctx, pool, picks){
+  const effRate = ctx.revRate === 0 ? 0 : Math.min(0.95, ctx.revRate + (ctx.rx.active ? 0.10 : 0));
+  const revAt = slot => {
+    if (effRate === 0) return false;
+    return rngFrom("rev|" + pool.key + "|" + slot + "|" + picks[slot]) () < effRate;
+  };
+  return [
+    { slot:SLOTS[0], idx:pool.order[picks.hour], rev:revAt("hour") },
+    { slot:SLOTS[1], idx:pool.personality,       rev:false },
+    { slot:SLOTS[2], idx:pool.order[picks.turn], rev:revAt("turn") }
+  ].map(c => ({ ...c, card:DECK[c.idx] }));
 }
 
 /* ============ card art ============ */
@@ -1487,35 +1502,53 @@ function weather(cards, rnd){
 /* ============ render ============ */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
-let LAST = null, TURNED = 0, PENDING_READING = "";
+let LAST = null, LAST_OPTS = null, CTX = null, POOL = null, PICKS = null;
 
-function updateTurnControl(){
-  const btn = $("turn-next"), hint = $("turn-hint");
-  if (TURNED >= SLOTS.length){
-    btn.hidden = true;
-    hint.textContent = "All three are face up. Tap any card to turn it back.";
-  } else {
-    btn.hidden = false;
-    btn.textContent = "Turn " + SLOTS[TURNED].label.replace(/^The /, "the ");
-    hint.textContent = SLOTS[TURNED].intent + ".";
+const PICKS_KEY = "hour-and-sign-picks";
+const loadPicks = () => { try { return JSON.parse(localStorage.getItem(PICKS_KEY) || "{}"); } catch (e) { return {}; } };
+const savePicks = o => { try { localStorage.setItem(PICKS_KEY, JSON.stringify(o)); } catch (e) {} };
+
+/* Lay the cut out face down. Whichever one is chosen is the card. */
+function renderFan(){
+  const fan = $("fan"), prompt = $("pick-prompt");
+  const taken = [PICKS.hour, PICKS.turn, PICKS.clarifier].filter(v => v !== undefined && v !== null);
+  const needed = PICKS.hour === undefined ? "hour" : (PICKS.turn === undefined ? "turn" : null);
+
+  fan.innerHTML = "";
+  for (let i = 0; i < FAN_SIZE; i++){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "fan-card" + (taken.indexOf(i) !== -1 ? " taken" : "");
+    b.style.setProperty("--tilt", ((i % 5) - 2) * 1.6 + "deg");
+    b.disabled = taken.indexOf(i) !== -1 || !needed;
+    b.setAttribute("aria-label", taken.indexOf(i) !== -1 ? "Card already taken" : "Face down card " + (i + 1));
+    b.innerHTML = '<span aria-hidden="true">&#10022;</span>';
+    b.addEventListener("click", () => pickCard(i));
+    fan.appendChild(b);
   }
+
+  if (needed === "hour") prompt.textContent = "Pick a card for the Hour, which is what is in front of you now.";
+  else if (needed === "turn") prompt.textContent = "Now pick one for the Turning, which is where it is going.";
+  else prompt.textContent = "Both cards are chosen, and your birth card is turned for you, since that one is not drawn. Change the question above if you want to ask the deck something else.";
+  /* Starting over is only offered mid choice. Once both are down the reading
+     stands, because choosing again until it improves is the same fishing the
+     question lock exists to prevent. */
+  $("repick").hidden = needed !== "turn";
+  fan.hidden = !needed;
 }
-function turnNext(){
-  const els = [...document.querySelectorAll(".card")];
-  if (TURNED >= els.length) return;
-  els[TURNED].classList.add("flipped");
-  TURNED++;
-  updateTurnControl();
-  if (TURNED === els.length){
-    $("reading").innerHTML = PENDING_READING;
-    $("reading-wait").hidden = true;
-    /* once everything is face up, let people flip cards back to look again */
-    els.forEach(el => { el.onclick = () => el.classList.toggle("flipped"); });
-  }
+
+function pickCard(i){
+  if (PICKS.hour === undefined) PICKS.hour = i;
+  else if (PICKS.turn === undefined && i !== PICKS.hour) PICKS.turn = i;
+  else return;
+  const store = loadPicks();
+  store[POOL.key] = PICKS;
+  savePicks(store);
+  paintSpread();
 }
 
 function render(opts){
-  const { bdate, bhour, name, revRate, deckSize, weighted, isExample } = opts;
+  const { bdate, bhour, name, revRate, deckSize, weighted, isExample, question } = opts;
   const parts = bdate.split("-").map(Number);
   const bY = parts[0], bM = parts[1], bD = parts[2];
   if (!bY || !bM || !bD) return;
@@ -1531,12 +1564,14 @@ function render(opts){
   const rx = mercuryRetrograde(now);
   const animal = animalFor(bY, bM, bD);
   const ctx = { bY, bM, bD, bHour:bhour || "x", now, sign, rising, wb, watch, ph, moon, rx, animal,
-                revRate, deckSize, weighted, name:name ? esc(name) : "" };
+                revRate, deckSize, weighted, question:question || "", name:name ? esc(name) : "" };
 
-  const drawn = drawSpread(ctx);
-  const cards = drawn.cards, soul = drawn.soul;
-  const read = compose(ctx, cards, soul, drawn.rnd);
-  const wx = weather(cards, drawn.rnd);
+  CTX = ctx;
+  LAST_OPTS = { bdate, bhour, name, revRate, deckSize, weighted, question:question || "" };
+  POOL = buildPool(ctx);
+  const stored = loadPicks()[POOL.key];
+  PICKS = stored ? { ...stored } : {};
+  const soul = POOL.soul;
 
   $("k-date").textContent = now.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
   $("k-hour").textContent = watch.name + ", hour of " + ph.ruler;
@@ -1546,7 +1581,7 @@ function render(opts){
     ["Sun sign",       '<span class="glyph">' + sign.glyph + "</span> " + sign.name + "<small>" + sign.el + ", " + sign.ruler + "</small>"],
     ["Rising",         rising ? '<span class="glyph">' + rising.glyph + "</span> " + rising.name + "<small>approx, no birthplace</small>"
                               : "Unknown<small>add a birth hour</small>"],
-    ["Standing card",  DECK[cards[1].idx].n + ". " + DECK[cards[1].idx].name + "<small>birth card</small>"],
+    ["Standing card",  DECK[POOL.personality].n + ". " + DECK[POOL.personality].name + "<small>birth card</small>"],
     ["Soul card",      DECK[soul].n + ". " + DECK[soul].name + "<small>reduced once more</small>"],
     ["Planetary hour", PLANETS[ph.ruler].glyph + " " + ph.ruler + "<small>" + ph.dayRuler + "'s day, hour " + (ph.hourIndex + 1) + "</small>"],
     ["Moon",           moon.name + "<small>" + moon.lit + " per cent, day " + Math.floor(moon.age) + "</small>"],
@@ -1557,45 +1592,82 @@ function render(opts){
   $("chart").innerHTML = chartRows.map(row => "<div><dt>" + row[0] + "</dt><dd>" + row[1] + "</dd></div>").join("");
   $("chart-for").textContent = (name ? esc(name) + ", " : "") + bdate +
     (bhour !== "" ? ", born " + String(bhour).padStart(2,"0") + ":00" : "") +
-    ", " + drawn.seeds.deckSize + " cards";
+    ", " + POOL.deckSize + " cards";
 
-  $("spread").innerHTML = cards.map((c, n) => {
-    const sub = c.card.major ? "Major Arcana" : c.card.suitName + ", " + ELEMENTS[c.card.el].kin;
+  $("asked").hidden = !question;
+  if (question) $("asked").innerHTML = "You asked: <strong>" + esc(question) + "</strong>";
+
+  $("example-flag").hidden = !isExample;
+  paintSpread();
+}
+
+/* Draws whatever has been chosen so far: face down until picked, face up
+   after, and the reading only once both are in. */
+function paintSpread(){
+  const ctx = CTX, pool = POOL;
+  const bothIn = PICKS.hour !== undefined && PICKS.turn !== undefined;
+  const slotState = [
+    PICKS.hour !== undefined,
+    bothIn,                      /* the birth card turns once the choosing is done */
+    PICKS.turn !== undefined
+  ];
+  const cards = bothIn ? buildSpread(ctx, pool, PICKS) : null;
+
+  const effRate = ctx.revRate === 0 ? 0 : Math.min(0.95, ctx.revRate + (ctx.rx.active ? 0.10 : 0));
+  const cardAt = n => {
+    if (n === 1) return { slot:SLOTS[1], idx:pool.personality, rev:false, card:DECK[pool.personality] };
+    const key = n === 0 ? "hour" : "turn";
+    if (PICKS[key] === undefined) return null;
+    const idx = pool.order[PICKS[key]];
+    const rev = effRate !== 0 && rngFrom("rev|" + pool.key + "|" + key + "|" + PICKS[key])() < effRate;
+    return { slot:SLOTS[n], idx, rev, card:DECK[idx] };
+  };
+
+  $("spread").innerHTML = SLOTS.map((slot, n) => {
+    const c = slotState[n] ? cardAt(n) : null;
+    const sub = c ? (c.card.major ? "Major Arcana" : c.card.suitName + ", " + ELEMENTS[c.card.el].kin) + ". " : "";
     return '<div class="slot">' +
-      '<div class="slot-label"><span>' + c.slot.label + "</span><b>" + c.slot.note + "</b></div>" +
-      '<div class="card" data-n="' + n + '" role="button" tabindex="0" aria-label="' + esc(c.slot.label) + ": " + esc(c.card.name) + (c.rev ? ", reversed" : "") + '">' +
+      '<div class="slot-label"><span>' + slot.label + "</span><b>" + slot.note + "</b></div>" +
+      '<div class="card' + (c ? " flipped" : "") + '" aria-label="' +
+        (c ? esc(slot.label) + ": " + esc(c.card.name) + (c.rev ? ", reversed" : "") : esc(slot.label) + ", face down") + '">' +
         '<div class="card-inner">' +
           '<div class="face back"><div class="back-grid"></div><div class="back-mark">&#10022;</div></div>' +
           '<div class="face front">' +
-            '<div class="card-num"><span>' + c.card.n + "</span>" + (c.rev ? '<span class="rev">REV</span>' : "") + "</div>" +
-            '<div class="art-box"><div class="art' + (c.rev ? " reversed" : "") + '">' +
-              cardArt(c.card).replace("<svg", '<svg class="under"') +
-              cardArt(c.card).replace("<svg", '<svg class="over"') +
-            "</div></div>" +
-            '<p class="card-name">' + c.card.name + "</p>" +
-            '<p class="card-kw">' + (c.rev ? c.card.rev : c.card.up) + "</p>" +
+            (c
+              ? '<div class="card-num"><span>' + c.card.n + "</span>" + (c.rev ? '<span class="rev">REV</span>' : "") + "</div>" +
+                '<div class="art-box"><div class="art' + (c.rev ? " reversed" : "") + '">' +
+                  cardArt(c.card).replace("<svg", '<svg class="under"') +
+                  cardArt(c.card).replace("<svg", '<svg class="over"') +
+                "</div></div>" +
+                '<p class="card-name">' + c.card.name + "</p>" +
+                '<p class="card-kw">' + (c.rev ? c.card.rev : c.card.up) + "</p>"
+              : "") +
           "</div>" +
         "</div>" +
       "</div>" +
-      '<p class="slot-note">' + sub + ". " + c.slot.intent + ".</p>" +
-      (c.card.calm ? '<p class="reassure"><b>Do not panic</b>' + c.card.calm + "</p>" : "") +
+      '<p class="slot-note">' + sub + slot.intent + ".</p>" +
       "</div>";
   }).join("");
 
-  /* Turned one at a time, in order, rather than dealt all at once. The
-     reading is held back until the third is face up. */
-  TURNED = 0;
-  PENDING_READING = read.html;
-  $("reading").innerHTML = "";
-  $("reading-wait").hidden = false;
-  [...document.querySelectorAll(".card")].forEach((el, n) => {
-    el.addEventListener("click", () => { if (n === TURNED) turnNext(); });
-    el.addEventListener("keydown", e => {
-      if ((e.key === "Enter" || e.key === " ") && n === TURNED){ e.preventDefault(); turnNext(); }
-    });
-  });
-  updateTurnControl();
-  $("reading-stamp").textContent = "sealed for " + watch.name.toLowerCase();
+  renderFan();
+
+  if (!bothIn){
+    $("reading").innerHTML = "";
+    $("reading-wait").hidden = false;
+    $("dials").innerHTML = "";
+    $("clarifier-box").hidden = true;
+    $("reading-stamp").textContent = "waiting on your choice";
+    LAST = null;
+    return;
+  }
+
+  const rnd = rngFrom(pool.rndSeed);
+  const read = compose(ctx, cards, pool.soul, rnd);
+  const wx = weather(cards, rnd);
+
+  $("reading").innerHTML = read.html;
+  $("reading-wait").hidden = true;
+  $("reading-stamp").textContent = "sealed for " + ctx.watch.name.toLowerCase();
 
   $("dials").innerHTML = wx.map(d =>
     '<div class="dial ' + d.cls + '"><span class="nm">' + d.nm + "</span>" +
@@ -1605,9 +1677,25 @@ function render(opts){
     document.querySelectorAll(".fill").forEach(f => { f.style.width = "calc(" + f.dataset.w + "% - 2px)"; });
   });
 
-  $("example-flag").hidden = !isExample;
-  LAST = { cards, soul, read, wx, sign, rising, watch, ph, moon, rx, animal,
-           bdate, bhour, name, revRate, deckSize, weighted };
+  $("clarifier-box").hidden = false;
+  renderClarifier();
+
+  LAST = { cards, soul:pool.soul, read, wx, sign:ctx.sign, rising:ctx.rising, watch:ctx.watch,
+           ph:ctx.ph, moon:ctx.moon, rx:ctx.rx, animal:ctx.animal,
+           bdate:ctx.bY + "-" + String(ctx.bM).padStart(2,"0") + "-" + String(ctx.bD).padStart(2,"0"),
+           bhour:ctx.bHour === "x" ? "" : ctx.bHour, name:ctx.name, revRate:ctx.revRate,
+           deckSize:ctx.deckSize, weighted:ctx.weighted, question:ctx.question };
+}
+
+function renderClarifier(){
+  const out = $("clarifier-out"), btn = $("clarify");
+  if (PICKS.clarifier === undefined){
+    out.hidden = true; btn.hidden = false;
+    return;
+  }
+  const card = DECK[POOL.order[PICKS.clarifier]];
+  out.hidden = false; btn.hidden = true;
+  out.innerHTML = "<b>" + card.name + "</b>. " + card.up + ". <em>" + card.voice + "</em>";
 }
 
 function readingText(){
@@ -1639,7 +1727,7 @@ function tickCountdown(){
     String(Math.floor(s / 3600)).padStart(2,"0") + ":" +
     String(Math.floor((s % 3600) / 60)).padStart(2,"0") + ":" +
     String(s % 60).padStart(2,"0");
-  if (s === 0 && LAST) render({ ...LAST, isExample:false });
+  if (s === 0 && LAST_OPTS) render({ ...LAST_OPTS, isExample:false });
 }
 
 /* ============ boot ============ */
@@ -1652,7 +1740,7 @@ function tickCountdown(){
     sel.appendChild(o);
   }
 
-  let bdate = "", bhour = "", name = "", revRate = 0.32, deckSize = 78, weighted = true, isExample = false;
+  let bdate = "", bhour = "", name = "", question = "", revRate = 0.32, deckSize = 78, weighted = true, isExample = false;
   const q = new URLSearchParams(location.search);
   if (/^\d{4}-\d{2}-\d{2}$/.test(q.get("b") || "")){
     bdate = q.get("b");
@@ -1679,10 +1767,12 @@ function tickCountdown(){
   $("revmode").value = String(revRate);
   $("deckmode").value = String(deckSize);
   $("weightmode").value = weighted ? "1" : "0";
-  render({ bdate, bhour, name, revRate, deckSize, weighted, isExample });
+  $("question").value = question;
+  render({ bdate, bhour, name, question, revRate, deckSize, weighted, isExample });
 
   const readForm = () => ({
     bdate:$("bdate").value, bhour:$("btime").value, name:$("bname").value.trim(),
+    question:$("question").value.trim(),
     revRate:Number($("revmode").value), deckSize:Number($("deckmode").value),
     weighted:$("weightmode").value === "1"
   });
@@ -1698,92 +1788,28 @@ function tickCountdown(){
   ["revmode","deckmode","weightmode"].forEach(id =>
     $(id).addEventListener("change", () => { if ($("example-flag").hidden) apply(false); }));
 
-  $("turn-next").addEventListener("click", turnNext);
-
-  /* Put them face down again and turn them one at a time. The cards do not
-     change: it is the same spread until the hour turns. */
-  $("reshuffle").addEventListener("click", () => {
-    document.querySelectorAll(".card").forEach(c => { c.classList.remove("flipped"); c.onclick = null; });
-    TURNED = 0;
-    $("reading").innerHTML = "";
-    $("reading-wait").hidden = false;
-    updateTurnControl();
+  /* Put them back face down and choose again. The cut itself does not change,
+     so this is a second chance at the choosing, not a second deal. */
+  $("repick").addEventListener("click", () => {
+    PICKS = {};
+    const store = loadPicks();
+    delete store[POOL.key];
+    savePicks(store);
+    paintSpread();
     $("h-spread").scrollIntoView({ behavior:"smooth", block:"start" });
   });
 
-  /* One question, one card, once a day.
-     Dealing repeatedly on the same question until the answer improves is the
-     one thing every reader warns against, so the answer is stored against the
-     question and the date, and asking again returns the same card. The draw
-     itself is still genuinely random the first time; it just cannot be
-     re-rolled. A single clarifier is allowed, which is traditional. */
-  const QKEY = "hour-and-sign-answers";
-  const normalise = q => q.toLowerCase().replace(/[^a-z0-9 ]+/g, "").replace(/\s+/g, " ").trim();
-  const todayKey = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
-  const loadAnswers = () => { try { return JSON.parse(localStorage.getItem(QKEY) || "{}"); } catch (e) { return {}; } };
-  const saveAnswers = o => { try { localStorage.setItem(QKEY, JSON.stringify(o)); } catch (e) {} };
-  const deckIds = () => (LAST && LAST.deckSize === 22) ? MAJOR_IDS : DECK.map(c => c.id);
-  const drawOne = () => {
-    const ids = deckIds();
-    const rate = LAST ? LAST.revRate : 0.32;
-    return { id:ids[Math.floor(cryptoRnd() * ids.length)], rev:rate > 0 && cryptoRnd() < rate };
-  };
-  const describe = (entry, label) => {
-    const card = DECK[entry.id];
-    return (label ? "<em>" + label + "</em> " : "") + "<b>" + card.name + "</b>" +
-      (entry.rev ? ", reversed" : "") + ". " + (entry.rev ? card.rev : card.up) + ". " +
-      "<em>" + card.voice + "</em>";
-  };
-  let currentKey = null;
-
-  function showAnswer(key, store, fresh){
-    const entry = store[key];
-    $("oneoff-out").hidden = false;
-    $("oneoff-result").innerHTML = '"' + esc(entry.q) + '" &rarr; ' + describe(entry, "");
-    if (entry.clarifier){
-      $("oneoff-clarifier").hidden = false;
-      $("oneoff-clarifier").innerHTML = describe(entry.clarifier, "Clarifier:");
-      $("clarify").hidden = true;
-      $("oneoff-meta").textContent = "Asked and clarified. This question is closed until tomorrow. Ask something else if you need to.";
-    } else {
-      $("oneoff-clarifier").hidden = true;
-      $("clarify").hidden = false;
-      $("oneoff-meta").textContent = fresh
-        ? "Drawn at random from " + deckIds().length + " cards. That is the answer to this question today, and asking again will return the same card. You may draw one clarifier."
-        : "You already asked this today, so here is the same card again. The deck does not change its mind. You may draw one clarifier, or ask something else.";
-    }
-  }
-
-  $("ask").addEventListener("click", () => {
-    const qText = $("question").value.trim();
-    if (!qText){
-      $("oneoff-out").hidden = false;
-      $("oneoff-clarifier").hidden = true;
-      $("clarify").hidden = true;
-      $("oneoff-result").textContent = "Ask something first. The deck does not answer an empty question.";
-      $("oneoff-meta").textContent = "";
-      currentKey = null;
-      return;
-    }
-    const store = loadAnswers();
-    const key = normalise(qText) + "|" + todayKey();
-    const fresh = !store[key];
-    if (fresh){
-      const d = drawOne();
-      store[key] = { q:qText, id:d.id, rev:d.rev };
-      saveAnswers(store);
-    }
-    currentKey = key;
-    showAnswer(key, store, fresh);
-  });
-
   $("clarify").addEventListener("click", () => {
-    if (!currentKey) return;
-    const store = loadAnswers();
-    if (!store[currentKey] || store[currentKey].clarifier) return;
-    store[currentKey].clarifier = drawOne();
-    saveAnswers(store);
-    showAnswer(currentKey, store, false);
+    if (!POOL || PICKS.clarifier !== undefined) return;
+    const taken = [PICKS.hour, PICKS.turn];
+    let i = 0;
+    while (i < FAN_SIZE && taken.indexOf(i) !== -1) i++;
+    /* a card from outside the laid out spread, so it is genuinely extra */
+    PICKS.clarifier = Math.min(FAN_SIZE + (Math.floor(cryptoRnd() * 6)), POOL.order.length - 1);
+    const store = loadPicks();
+    store[POOL.key] = PICKS;
+    savePicks(store);
+    renderClarifier();
   });
 
   const flash = (el, msg) => { el.textContent = msg; el.hidden = false; setTimeout(() => { el.hidden = true; }, 1900); };
