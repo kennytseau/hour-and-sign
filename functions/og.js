@@ -43,20 +43,29 @@ function birthCard(y, m, d){                       /* Mary Greer's method */
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 
-/* Satori needs a real font buffer and cannot read woff2, so ask Google Fonts
-   with an old User-Agent, which makes it serve TTF. Cached at the edge. */
+/* Satori needs a real font buffer and CANNOT parse woff2.
+ *
+ * Google Fonts picks the format from the User-Agent, and it serves woff2 to
+ * anything it recognises as a modern browser -- a Chrome/40 UA still gets
+ * woff2, which Satori renders as a box per glyph. A bare "Mozilla/5.0" is not
+ * recognised, so it falls back to TTF. We then pick a .ttf URL explicitly
+ * rather than trusting the first src in the stylesheet. Cached at the edge.
+ */
 async function loadFont(family, weight, ctx){
   const cssUrl = `https://fonts.googleapis.com/css2?family=${family}:wght@${weight}`;
   const cache = caches.default;
-  const key = new Request(cssUrl + "#ttf");
+  const key = new Request(cssUrl + "#ttf-v2");          /* v2: do not reuse cached woff2 */
   let hit = await cache.match(key);
   if (!hit){
-    const css = await fetch(cssUrl, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 Chrome/40 Safari/537.36" }
-    }).then(r => r.text());
-    const url = css.match(/src:\s*url\(([^)]+)\)/)?.[1];
+    const res = await fetch(cssUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+    if (!res.ok) return null;
+    const css = await res.text();
+    const urls = [...css.matchAll(/url\((https:\/\/[^)]+)\)/g)].map(m => m[1]);
+    const url = urls.find(u => u.endsWith(".ttf")) || urls.find(u => !u.endsWith(".woff2"));
     if (!url) return null;
-    hit = new Response(await fetch(url).then(r => r.arrayBuffer()), {
+    const font = await fetch(url);
+    if (!font.ok) return null;
+    hit = new Response(await font.arrayBuffer(), {
       headers: { "Cache-Control": "public, max-age=31536000" }
     });
     ctx?.waitUntil(cache.put(key, hit.clone()));
@@ -90,6 +99,16 @@ export async function onRequestGet(context){
   const fonts = [];
   if (display) fonts.push({ name:"Fraunces", data:display, weight:900, style:"normal" });
   if (mono) fonts.push({ name:"Space Mono", data:mono, weight:700, style:"normal" });
+
+  /* /og?debug=1 reports what the font fetch actually got. A font that fails to
+     load renders every glyph as a box, which is silent and easy to miss. */
+  if (url.searchParams.get("debug") === "1"){
+    return new Response(JSON.stringify({
+      fraunces_bytes: display ? display.byteLength : null,
+      space_mono_bytes: mono ? mono.byteLength : null,
+      fonts_passed_to_satori: fonts.map(f => f.name)
+    }, null, 1), { headers: { "Content-Type": "application/json" } });
+  }
 
   const html = `
     <div style="display:flex;width:1200px;height:630px;background:#e7e4d8;color:#141e3c;
