@@ -40,8 +40,10 @@ function birthCard(y, m, d){                       /* Mary Greer's method */
   while (t > 22) t = digitSum(t);
   return t === 22 ? 0 : t;
 }
-const esc = s => String(s).replace(/[&<>"]/g, c =>
-  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+/* The markup below IS parsed, but entities are NOT decoded by the renderer.
+   So escaping to &lt; would display "&lt;" to the viewer. Strip the characters
+   that could break the markup instead, and leave everything else alone. */
+const safeText = s => String(s).replace(/[<>&"]/g, "").slice(0, 24);
 
 /* Satori needs a real font buffer and CANNOT parse woff2.
  *
@@ -79,16 +81,20 @@ export async function onRequestGet(context){
   const b = url.searchParams.get("b") || "";
   const name = (url.searchParams.get("n") || "").slice(0, 24);
 
-  let heading = "Hour &amp; Sign";
+  /* Satori renders text, it does not parse HTML, so entities such as &amp;
+     would appear literally. Use the real characters here. Zodiac glyphs are
+     also left out: neither Fraunces nor Space Mono has them, and a missing
+     glyph renders as an empty box. */
+  let heading = "Hour & Sign";
   let sub = "Three cards, cut by your birth date and the hour you ask in";
-  let numeral = "✦", cardName = "78 cards", meta = "A full deck, reshuffled eight times a day";
+  let numeral = "*", cardName = "78 cards", meta = "A full deck, reshuffled eight times a day";
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(b)){
     const [y, m, d] = b.split("-").map(Number);
     const s = signFor(m, d);
     const card = birthCard(y, m, d);
-    heading = name ? esc(name) : (s[0] + " sun");
-    sub = `${s[1]} ${s[0]} · ${s[4]}`;
+    heading = name ? safeText(name) : (s[0] + " sun");
+    sub = `${s[0]} · ${s[4]}`;
     numeral = NUMERALS[card];
     cardName = MAJORS[card];
     meta = "Standing card · the one that never changes";
@@ -116,7 +122,7 @@ export async function onRequestGet(context){
       <div style="display:flex;flex-direction:column;justify-content:space-between;flex:1;">
         <div style="display:flex;flex-direction:column;">
           <div style="display:flex;font-family:'Space Mono',monospace;font-size:22px;
-                      letter-spacing:6px;color:#4e5675;">HOUR &amp; SIGN</div>
+                      letter-spacing:6px;color:#4e5675;">HOUR & SIGN</div>
           <div style="display:flex;font-size:84px;font-weight:900;margin-top:18px;
                       line-height:1;">${heading}</div>
           <div style="display:flex;font-family:'Space Mono',monospace;font-size:28px;
@@ -139,6 +145,9 @@ export async function onRequestGet(context){
     width: 1200,
     height: 630,
     fonts: fonts.length ? fonts : undefined,
-    headers: { "Cache-Control": "public, max-age=86400, s-maxage=604800" }
+    /* A week at the edge meant a broken image stayed broken for a week, and
+       only a new query string could get past it. A day is still plenty for a
+       deterministic image, and makes a fix reachable. */
+    headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400" }
   });
 }
