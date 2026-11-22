@@ -143,6 +143,21 @@ Run it locally with the Functions working:
 npx wrangler@latest pages dev .
 ```
 
+### If pushes stop triggering builds
+
+Symptom: the first deployment succeeds, then later pushes do nothing, and the
+project page shows *"This project is disconnected from your Git account."*
+
+Cause: the **Cloudflare Workers and Pages** GitHub App is set to *Only select
+repositories* and this repo is not one of them. A **public** repo is still
+visible to the app read-only, which is enough for Cloudflare to clone it once
+during setup — so the first deploy works and hides the problem — but not enough
+to receive push events.
+
+Fix: GitHub → **Settings → Applications → Cloudflare Workers and Pages →
+Configure**, and add this repository under **Repository access**. No need to
+grant *All repositories*.
+
 ## Shareable links
 
 ```
