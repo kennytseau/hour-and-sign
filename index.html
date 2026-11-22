@@ -374,6 +374,11 @@ button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--g
 .reading h3::after{content:"";flex:1;height:1px;background:var(--rule-soft)}
 .reading h3:first-child{margin-top:0}
 .reading p{margin:0 0 1rem;max-width:62ch}
+.scale{border-left:2px solid var(--rule);padding-left:.9rem}
+.scale b{
+  display:block; font-family:var(--font-label); font-size:.7rem; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--spectre); margin-bottom:.25rem;
+}
 /* Body face, not the display face. Cinzel is effectively small caps and a
    whole paragraph of it is hard work to read. */
 .reading p.lead{
@@ -928,13 +933,13 @@ const PLANETS = {
   /* "do" is a whole sentence of its own. It used to be a trailing clause,
      which produced "it is fine. and get it in writing." once it was appended
      to a counsel line that already ended in a full stop. */
-  Saturn:  { glyph:"\u2644", mood:"slow, serious and allergic to shortcuts", do:"Do it slowly, and only once.", of:"limits, patience and old debts" },
-  Jupiter: { glyph:"\u2643", mood:"generous and a little over confident",    do:"Then ask for more than you need.", of:"luck, scale and generosity" },
-  Mars:    { glyph:"\u2642", mood:"sharp edged and impatient",               do:"Do it now rather than well.", of:"heat, conflict and getting started" },
-  Sun:     { glyph:"\u2609", mood:"bright, visible, hard to hide in",        do:"Do it where people can see.", of:"clarity, pride and being seen" },
-  Venus:   { glyph:"\u2640", mood:"soft, sociable, easily charmed",          do:"Do it with someone you like.", of:"pleasure, taste and other people" },
-  Mercury: { glyph:"\u263f", mood:"quick, talkative and prone to typos",     do:"Check the wording twice before it goes.", of:"messages, deals and quick thinking" },
-  Moon:    { glyph:"\u263e", mood:"tidal and a bit dreamlike",               do:"Do not explain yourself afterwards.", of:"mood, memory and the half remembered" }
+  Saturn:  { glyph:"\u2644", mood:"slow, serious and allergic to shortcuts", do:"Do it slowly, and only once.", of:"limits, patience and old debts", metal:"lead", colour:"black" },
+  Jupiter: { glyph:"\u2643", mood:"generous and a little over confident",    do:"Then ask for more than you need.", of:"luck, scale and generosity", metal:"tin", colour:"deep blue" },
+  Mars:    { glyph:"\u2642", mood:"sharp edged and impatient",               do:"Do it now rather than well.", of:"heat, conflict and getting started", metal:"iron", colour:"red" },
+  Sun:     { glyph:"\u2609", mood:"bright, visible, hard to hide in",        do:"Do it where people can see.", of:"clarity, pride and being seen", metal:"gold", colour:"gold" },
+  Venus:   { glyph:"\u2640", mood:"soft, sociable, easily charmed",          do:"Do it with someone you like.", of:"pleasure, taste and other people", metal:"copper", colour:"green" },
+  Mercury: { glyph:"\u263f", mood:"quick, talkative and prone to typos",     do:"Check the wording twice before it goes.", of:"messages, deals and quick thinking", metal:"quicksilver", colour:"orange" },
+  Moon:    { glyph:"\u263e", mood:"tidal and a bit dreamlike",               do:"Do not explain yourself afterwards.", of:"mood, memory and the half remembered", metal:"silver", colour:"white" }
 };
 function planetaryHour(date){
   const dow = date.getDay();
@@ -973,6 +978,40 @@ function moonInfo(date){
   const idx = Math.floor(((age / SYN) * 8 + 0.5)) % 8;
   const lit = Math.round((1 - Math.cos((age / SYN) * 2 * Math.PI)) / 2 * 100);
   return { idx, age, lit, ...MOONS[idx] };
+}
+
+/* ============ whole sign houses ============
+   This is the mechanism behind every "same transit, different life area"
+   horoscope: the house is simply how far the transiting sign sits from your
+   own, counted in signs. Classical triplicities give each house an element,
+   which is what lets the sky be read against the suits on the table. */
+const HOUSES = [
+  "you, your body and how you come across",
+  "money, possessions and what you actually value",
+  "conversations, short trips, siblings and neighbours",
+  "home, family and where you come from",
+  "creativity, romance, play and anything you make",
+  "work, routine, health and the daily grind",
+  "partnership, and the people you have agreements with",
+  "shared money, debts, intimacy and what is kept hidden",
+  "travel, study, belief and the longer view",
+  "career, reputation and what you are known for",
+  "friends, groups and the things you are hoping for",
+  "solitude, rest, endings and what you keep private"
+];
+const houseNumber = (transitIdx, baseIdx) => (((transitIdx - baseIdx) % 12) + 12) % 12 + 1;
+const houseElement = h => ["Fire","Earth","Air","Water"][(h - 1) % 4];
+const ordinalHouse = h => ["first","second","third","fourth","fifth","sixth","seventh",
+                           "eighth","ninth","tenth","eleventh","twelfth"][h - 1];
+
+/* The moon's sign from its mean longitude. Good to a degree or two most days
+   and occasionally wrong within a few hours of a sign change, which is why
+   the page calls it approximate. SIGNS starts at Capricorn, so Aries sits at
+   index 3 and the offset has to be added back. */
+function moonSign(date){
+  const d = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 86400000;
+  const lon = ((218.316 + 13.176396 * d) % 360 + 360) % 360;
+  return SIGNS[(Math.floor(lon / 30) + 3) % 12];
 }
 
 /* ============ Mercury retrograde, approximated ============ */
@@ -1254,23 +1293,46 @@ function compose(ctx, cards, soul, rnd){
       : "which slows all three of them down.") +
     " In three hours a different planet takes over and the balance shifts again.</p>");
 
-  /* 2. horoscope: the sky as it is right now */
+  /* 2. horoscope, split by how long each thing lasts, because an hour and a
+        season are not the same kind of news. Houses are what make any of it
+        about the reader rather than about the sky. */
+  const base = rising || sign;                 /* rising rules the houses when we have it */
+  const mSign = moonSign(now);
+  const mHouse = houseNumber(SIGNS.indexOf(mSign), SIGNS.indexOf(base));
+  const sHouse = houseNumber(SIGNS.indexOf(seasonSign), SIGNS.indexOf(base));
+  const hourStart = (6 + ph.hourIndex) % 24;
+  const two = n => String(n).padStart(2, "0");
+
   out.push('<h3>Your horoscope</h3>');
-  out.push("<p>" + pick(rnd, [
-    "It is <strong>" + watch.name + "</strong>, and " + watch.phrase + ".",
-    "<strong>" + watch.name + "</strong> is holding the deck, and " + watch.phrase + ".",
-    "<strong>" + watch.name + "</strong>, which means " + watch.phrase + "."
-  ]) + " By the old reckoning this is an hour of <strong>" + art(ph.ruler) + "</strong> " + planet.glyph +
-    ", the " + ordinal(ph.hourIndex + 1) + " hour after sunrise on a day ruled by " + art(ph.dayRuler) + ". " +
+  out.push('<p class="scale"><b>This hour, until ' + two((hourStart + 1) % 24) + ":00</b>" +
+    "It is <strong>" + watch.name + "</strong>, and " + watch.phrase + ". From " + two(hourStart) +
+    ":00 to " + two((hourStart + 1) % 24) + ":00 the hour belongs to <strong>" + art(ph.ruler) + "</strong> " +
+    planet.glyph + ", on a day ruled by " + art(ph.dayRuler) + ". " +
     art(ph.ruler).charAt(0).toUpperCase() + art(ph.ruler).slice(1) + " governs " + planet.of +
-    ", and the hour is " + planet.mood + ".</p>");
-  out.push("<p>The sun is currently in <strong>" + seasonSign.name + "</strong>, so the season is pushing everyone toward " +
-    SEASON_PRESSURE[seasonSign.name] + ", whether it suits them or not" +
-    (seasonSign.name === sign.name ? ", and since that is your own sign you will feel it as encouragement rather than pressure" : "") +
-    ". The moon is <strong>" + moon.name + "</strong> at " + moon.lit + " per cent lit. " +
+    ", so the hour is " + planet.mood + ". " +
+    (planet.metal === planet.colour
+      ? "Its metal and its colour are both " + planet.metal
+      : "Its metal is " + planet.metal + " and its colour is " + planet.colour) +
+    ", if you want something to carry.</p>");
+
+  out.push('<p class="scale"><b>Today, and the next day or so</b>' +
+    "The moon is in <strong>" + mSign.name + "</strong>, which counted from your " +
+    (rising ? "rising sign" : "sun sign") + " is your <strong>" + ordinalHouse(mHouse) + " house</strong>: " +
+    HOUSES[mHouse - 1] + ". That is the corner of your life the next day or two actually happens in, whatever else is on your calendar. " +
+    "It is <strong>" + moon.name + "</strong> at " + moon.lit + " per cent lit. " +
     moon.phrase.charAt(0).toUpperCase() + moon.phrase.slice(1) + ".</p>");
-  if (rx.active){
-    out.push("<p><strong>Mercury is retrograde</strong>, give or take a few days, which is the one piece of sky most people notice. Expect the misread message and the thing that needs saying twice.</p>");
+
+  out.push('<p class="scale"><b>This season, and the weeks around it</b>' +
+    "The sun is in <strong>" + seasonSign.name + "</strong>, your <strong>" + ordinalHouse(sHouse) +
+    " house</strong>, so the slower pressure this month is on " + HOUSES[sHouse - 1] + ". " +
+    "Everyone is being pushed toward " + SEASON_PRESSURE[seasonSign.name] + " at the moment" +
+    (seasonSign.name === sign.name ? ", and since that is your own sign you will feel it as encouragement rather than pressure" : "") + ". " +
+    (rx.active
+      ? "<strong>Mercury is retrograde</strong> as well, give or take a few days, which is the one piece of sky most people notice. Expect the misread message and the thing that has to be said twice."
+      : "Mercury is direct, so at least nothing is asking to be said twice.") + "</p>");
+
+  if (!rising){
+    out.push("<p>All of that is counted from your sun sign, because no birth hour was given. Add one above and the houses are counted from your rising sign instead, which is what most astrologers would use, since rising is what decides which part of your life a transit lands in.</p>");
   }
 
   /* 3. the cards */
@@ -1337,6 +1399,27 @@ function compose(ctx, cards, soul, rnd){
     links.push("The sun is in " + seasonSign.name + " and <strong>" + DECK[seasonCardId].name +
       "</strong>, that sign's card, has come up. The pressure is coming from the season rather than from your own chart, " +
       "so it will pass on its own.");
+  }
+
+  /* The strongest link available: the house says where in your life, the
+     cards say what. Houses carry classical elements, so the two can be
+     compared instead of just printed next to each other. */
+  const hEl = houseElement(mHouse);
+  const minorsAll = cards.filter(c => !c.card.major);
+  const matchHouse = minorsAll.filter(c => c.card.el === hEl);
+  const clashHouse = minorsAll.filter(c => DIGNITY[hEl][c.card.el] === "opposed");
+  if (matchHouse.length){
+    links.push("The moon is lighting your " + ordinalHouse(mHouse) + " house, which is " + HOUSES[mHouse - 1] +
+      ", and that house is " + hEl + ". So " + (matchHouse.length > 1 ? "are " : "is ") +
+      matchHouse.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") +
+      ". The sky and the deck have named the same part of your life, which is the closest this gets to a straight answer.");
+  } else if (clashHouse.length){
+    links.push("The moon is lighting your " + ordinalHouse(mHouse) + " house, " + HOUSES[mHouse - 1] +
+      ", which is " + hEl + ". The cards came back " + clashHouse.map(c => c.card.el).join(" and ") +
+      " instead. When the sky points at one part of your life and the deck answers about another, the usual reason is that the first is the question you are willing to ask and the second is the one underneath it.");
+  } else if (minorsAll.length === 0){
+    links.push("The moon is lighting your " + ordinalHouse(mHouse) + " house, " + HOUSES[mHouse - 1] +
+      ", and the cards are all Majors, so they will not narrow it down for you. Read the house as the setting and the Majors as the weather in it.");
   }
 
   const minors = cards.filter(c => !c.card.major);
@@ -1585,6 +1668,12 @@ function render(opts){
     ["Soul card",      DECK[soul].n + ". " + DECK[soul].name + "<small>reduced once more</small>"],
     ["Planetary hour", PLANETS[ph.ruler].glyph + " " + ph.ruler + "<small>" + ph.dayRuler + "'s day, hour " + (ph.hourIndex + 1) + "</small>"],
     ["Moon",           moon.name + "<small>" + moon.lit + " per cent, day " + Math.floor(moon.age) + "</small>"],
+    ["Moon in",        (function(){
+                         const ms = moonSign(now);
+                         const h = houseNumber(SIGNS.indexOf(ms), SIGNS.indexOf(rising || sign));
+                         return '<span class="glyph">' + ms.glyph + "</span> " + ms.name +
+                           "<small>your " + ordinalHouse(h) + " house</small>";
+                       })()],
     ["Mercury",        (rx.active ? '<span class="rx">Retrograde</span>' : "Direct") +
                        "<small>approx, " + Math.abs(rx.daysFromCentre) + "d " + (rx.daysFromCentre <= 0 ? "to" : "from") + " centre</small>"],
     ["Year of the",    animal + "<small>4 Feb cutoff</small>"]
