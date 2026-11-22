@@ -9,7 +9,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="/">
 <!-- /og is a Cloudflare Pages Function. functions/_middleware.js rewrites these
-     four tags per shared reading, because crawlers do not run JavaScript. -->
+     tags per shared reading, because crawlers do not run JavaScript. -->
 <meta property="og:image" content="/og">
 <meta name="twitter:card" content="summary_large_image">
 <!--#artifact-start-->
@@ -17,330 +17,446 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Josefin+Sans:wght@400;600;700&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap">
 <style>
 /* This file is deliberately pure ASCII. Every symbol is an HTML entity or a JS
    \u escape, so no byte above 127 exists and no encoding step can mangle it.
-   Layout concept: a two-colour risograph almanac - one narrow column of printed
-   panels, hairline rules instead of cards, misregistered ink on toned paper. */
+   It also contains no em dashes anywhere, by request.
+
+   Look: occult noir. Deep teal-black shadow, amber lamplight, a spectral
+   verdigris glow and oxblood for the heavy cards, laid out as art deco
+   panels with hairline gold rules and bracketed corners. Single dark theme
+   on purpose, so every colour is declared outright. */
 :root{
-  --paper:#e7e4d8;
-  --paper-2:#dedac9;
-  --paper-3:#d2cdba;
-  --ink:#141e3c;
-  --ink-soft:#4e5675;
-  --flare:#ff3f6b;
-  --moss:#1c7366;
-  --rule:rgba(20,30,60,.22);
-  --rule-hard:rgba(20,30,60,.55);
-  --dot:rgba(20,30,60,.5);
-  --font-display:'Fraunces',Georgia,'Times New Roman',serif;
-  --font-body:'Newsreader',Georgia,'Times New Roman',serif;
-  --font-mono:'Space Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#10131e; --paper-2:#171b29; --paper-3:#1f2436;
-    --ink:#eae7db; --ink-soft:#9ba2bb; --flare:#ff5f82; --moss:#56b8a6;
-    --rule:rgba(234,231,219,.2); --rule-hard:rgba(234,231,219,.5); --dot:rgba(234,231,219,.42);
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#10131e; --paper-2:#171b29; --paper-3:#1f2436;
-  --ink:#eae7db; --ink-soft:#9ba2bb; --flare:#ff5f82; --moss:#56b8a6;
-  --rule:rgba(234,231,219,.2); --rule-hard:rgba(234,231,219,.5); --dot:rgba(234,231,219,.42);
+  --void:#080c0c;          /* page ground */
+  --dusk:#0f1817;          /* panels */
+  --dusk-2:#15201f;        /* raised panels, card faces */
+  --dusk-3:#1b2827;        /* card backs */
+  --bone:#ece4d3;          /* body text */
+  --bone-dim:#9aa8a2;      /* secondary text */
+  --gold:#e0a53f;          /* lamplight, primary accent */
+  --gold-deep:#8a6422;     /* hairlines */
+  --spectre:#4fbfa8;       /* the green glow */
+  --oxblood:#c04a3c;       /* heavy cards, reversals */
+  --rule:rgba(224,165,63,.22);
+  --rule-soft:rgba(224,165,63,.12);
+
+  --font-display:'Cinzel',Georgia,'Times New Roman',serif;
+  --font-body:'Spectral',Georgia,'Times New Roman',serif;
+  --font-label:'Josefin Sans','Segoe UI',system-ui,sans-serif;
+
   color-scheme:dark;
 }
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font-family:var(--font-body); font-size:17px; line-height:1.6; font-weight:400;
+  margin:0;
+  background:var(--void);
+  color:var(--bone);
+  font-family:var(--font-body);
+  font-size:18px;
+  line-height:1.8;
+  font-weight:300;
+}
+/* lamplight falling from above, plus a fine grain */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(224,165,63,.10), transparent 60%),
+    radial-gradient(80% 50% at 85% 20%, rgba(79,191,168,.06), transparent 70%);
 }
 body::after{
-  content:""; position:fixed; inset:0; pointer-events:none; z-index:60; opacity:.5;
-  background-image:radial-gradient(var(--dot) .5px, transparent .5px);
-  background-size:4px 4px; mix-blend-mode:multiply;
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:60; opacity:.35;
+  background-image:radial-gradient(rgba(236,228,211,.14) .5px, transparent .5px);
+  background-size:3px 3px;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) body::after{mix-blend-mode:screen;opacity:.22}
-}
-:root[data-theme="dark"] body::after{mix-blend-mode:screen;opacity:.22}
 
 .wrap{
-  max-width:46rem; margin:0 auto;
-  padding-left:max(16px, env(safe-area-inset-left, 0px));
-  padding-right:max(16px, env(safe-area-inset-right, 0px));
-  padding-block:0 3rem;
+  position:relative; z-index:1;
+  max-width:48rem; margin:0 auto;
+  padding-left:max(18px, env(safe-area-inset-left, 0px));
+  padding-right:max(18px, env(safe-area-inset-right, 0px));
+  padding-block:0 4rem;
 }
 
-/* masthead */
-header.mast{padding-block:2.2rem 1.1rem}
-.mast-rule{border:0;border-top:2px solid var(--ink);margin:0 0 .55rem}
-.mast-rule.thin{border-top:1px solid var(--rule-hard);margin:.5rem 0 0}
+/* ---- deco panel ---- */
+.panel{
+  position:relative;
+  background:linear-gradient(180deg, var(--dusk), rgba(15,24,23,.72));
+  border:1px solid var(--rule);
+  padding:1.4rem 1.35rem 1.5rem;
+}
+.panel::before,.panel::after{
+  content:""; position:absolute; width:14px; height:14px; pointer-events:none;
+  border:1px solid var(--gold); opacity:.55;
+}
+.panel::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.panel::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+
+/* ---- masthead ---- */
+header.mast{padding-block:2.6rem 1rem}
 .kicker{
-  font-family:var(--font-mono); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:.4rem 1.1rem; justify-content:space-between;
+  font-family:var(--font-label); font-size:.68rem; font-weight:600;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--gold);
+  display:flex; flex-wrap:wrap; gap:.3rem 1.3rem; opacity:.85;
 }
+.kicker span+span{color:var(--bone-dim)}
+.mast-top{display:flex;gap:1.5rem;align-items:flex-end;flex-wrap:wrap}
+.mast-words{flex:1 1 18rem;min-width:0}
 h1{
-  font-family:var(--font-display); font-variation-settings:'SOFT' 0,'WONK' 1,'opsz' 120;
-  font-weight:900; font-size:clamp(2.9rem,13vw,5.4rem); line-height:.92;
-  letter-spacing:-.02em; margin:.5rem 0 .3rem; text-wrap:balance;
+  font-family:var(--font-display); font-weight:900;
+  font-size:clamp(2.5rem,10vw,4.4rem); line-height:1;
+  letter-spacing:.02em; margin:.7rem 0 .1rem; color:var(--bone);
+  text-wrap:balance;
 }
-h1 .amp{font-style:italic;font-weight:400;color:var(--flare);font-variation-settings:'WONK' 1}
-.dek{font-size:1.08rem;color:var(--ink-soft);max-width:34rem;margin:0;font-weight:300}
-.dek em{color:var(--ink);font-style:italic}
+h1 .amp{color:var(--gold);font-weight:400;font-style:normal}
+.dek{
+  font-size:1.1rem; color:var(--bone-dim); max-width:36rem; margin:.6rem 0 0; font-weight:300;
+}
+.dek em{color:var(--gold);font-style:italic}
+.rule-deco{
+  border:0; height:1px; margin:1.3rem 0 0;
+  background:linear-gradient(90deg, transparent, var(--gold-deep) 12%, var(--gold) 50%, var(--gold-deep) 88%, transparent);
+  opacity:.65;
+}
 
-/* sections */
-.sec{margin-top:2.4rem}
+/* ---- the cat ---- */
+.cat{width:140px;height:176px;flex:0 0 auto;overflow:visible;display:block}
+.cat .fur{fill:#05090a}
+.cat .rim{fill:none;stroke:var(--gold);stroke-width:1.1;opacity:.5}
+.cat .moon{fill:none;stroke:var(--gold);stroke-width:1;opacity:.28}
+.cat .eye{fill:var(--gold)}
+.cat .eye-glow{fill:var(--gold);opacity:.22}
+.cat .slit{fill:#05090a}
+.cat .whisker{stroke:var(--bone-dim);stroke-width:.7;opacity:.26;stroke-linecap:round}
+.cat .inner-ear{fill:var(--oxblood);opacity:.55}
+.cat-eyes{transform-origin:80px 78px;animation:blink 7s infinite}
+.cat-tail{transform-origin:112px 178px;animation:sway 6s ease-in-out infinite}
+@keyframes blink{
+  0%,92%,100%{transform:scaleY(1)}
+  94%,97%{transform:scaleY(.08)}
+}
+@keyframes sway{
+  0%,100%{transform:rotate(0deg)}
+  50%{transform:rotate(-7deg)}
+}
+
+/* ---- sections ---- */
+.sec{margin-top:3rem}
 .sec-head{
-  display:flex; align-items:baseline; gap:.75rem;
-  border-bottom:1px solid var(--rule-hard); padding-bottom:.35rem; margin-bottom:1rem;
+  display:flex; align-items:baseline; gap:.9rem; flex-wrap:wrap;
+  border-bottom:1px solid var(--rule); padding-bottom:.5rem; margin-bottom:1.3rem;
 }
 .sec-head h2{
-  font-family:var(--font-mono); font-size:.7rem; font-weight:700;
-  letter-spacing:.22em; text-transform:uppercase; margin:0;
+  font-family:var(--font-display); font-size:1.12rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; margin:0; color:var(--gold);
 }
 .sec-head .note{
-  font-family:var(--font-mono); font-size:.64rem; letter-spacing:.1em;
-  color:var(--ink-soft); margin-left:auto; text-align:right;
+  font-family:var(--font-label); font-size:.72rem; font-weight:400; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--bone-dim); margin-left:auto;
 }
 
-/* disclosure panels */
-details{border:1px solid var(--rule-hard);background:var(--paper-2);margin-top:1rem}
-details+details{margin-top:.5rem}
+/* ---- disclosure ---- */
+details{border:1px solid var(--rule);background:rgba(15,24,23,.6);margin-top:1.1rem}
+details+details{margin-top:.6rem}
 summary{
-  cursor:pointer; list-style:none; padding:.6rem .75rem;
-  font-family:var(--font-mono); font-size:.66rem; font-weight:700;
-  letter-spacing:.14em; text-transform:uppercase;
-  display:flex; justify-content:space-between; gap:.6rem; align-items:center;
+  cursor:pointer; list-style:none; padding:.85rem 1rem;
+  font-family:var(--font-label); font-size:.78rem; font-weight:600;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--gold);
+  display:flex; justify-content:space-between; gap:.8rem; align-items:center;
 }
 summary::-webkit-details-marker{display:none}
-summary::after{content:"+";color:var(--flare);font-size:1rem;line-height:1}
-details[open] summary::after{content:"\2013"}
-summary:focus-visible{outline:2px solid var(--flare);outline-offset:-2px}
-.details-body{padding:0 .75rem .85rem;border-top:1px solid var(--rule)}
-.details-body p{margin:.75rem 0 0;font-size:.95rem;max-width:36rem}
+summary::after{content:"+";font-size:1.2rem;line-height:1;color:var(--gold)}
+details[open] summary::after{content:"-"}
+summary:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
+.details-body{padding:.2rem 1rem 1.1rem;border-top:1px solid var(--rule-soft)}
+.details-body p{margin:1rem 0 0;max-width:60ch;color:var(--bone)}
 .gloss{margin:0;padding:0}
 .gloss dt{
-  font-family:var(--font-mono); font-size:.62rem; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--flare); margin-top:.85rem;
+  font-family:var(--font-label); font-size:.74rem; font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--gold); margin-top:1.1rem;
 }
-.gloss dd{margin:.15rem 0 0;font-size:.95rem;max-width:36rem}
+.gloss dd{margin:.25rem 0 0;max-width:60ch}
 .seedlist{
-  font-family:var(--font-mono); font-size:.68rem; line-height:1.9;
-  margin:.75rem 0 0; padding:0; list-style:none; word-break:break-word;
+  font-family:var(--font-label); font-size:.82rem; line-height:2;
+  margin:1rem 0 0; padding:0; list-style:none; word-break:break-word; color:var(--bone-dim);
 }
-.seedlist li span{color:var(--flare)}
-table.odds{
-  width:100%; border-collapse:collapse; margin-top:.8rem;
-  font-family:var(--font-mono); font-size:.64rem;
-}
-table.odds th,table.odds td{
-  text-align:left; padding:.32rem .4rem; border-bottom:1px solid var(--rule); vertical-align:top;
-}
-table.odds th{color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
-table.odds td.mult{color:var(--flare);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.seedlist li b{color:var(--gold);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:.74rem}
+table.odds{width:100%;border-collapse:collapse;margin-top:1rem;font-family:var(--font-label);font-size:.82rem}
+table.odds th,table.odds td{text-align:left;padding:.5rem .5rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+table.odds th{color:var(--gold);letter-spacing:.14em;text-transform:uppercase;font-weight:600;font-size:.72rem}
+table.odds td.mult{color:var(--spectre);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 
-/* form */
-form{
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));
-  gap:.9rem 1rem; align-items:end;
+/* ---- the form ---- */
+/* Every field is the same three-row stack, so the controls sit on one
+   baseline no matter how long the label is. Qualifiers live inside the
+   label, which is what used to knock the rows out of alignment. */
+.deck-form{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));
+  gap:1.1rem 1.2rem;
 }
-.field{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.field{display:grid;grid-template-rows:auto 1fr;gap:.45rem;min-width:0}
 .field label{
-  font-family:var(--font-mono); font-size:.62rem; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--ink-soft);
+  font-family:var(--font-label); font-size:.74rem; font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--gold); line-height:1.3;
 }
+.field label i{font-style:normal;color:var(--bone-dim);font-weight:400;letter-spacing:.1em}
 .field input,.field select{
-  font-family:var(--font-mono); font-size:.92rem; color:var(--ink);
-  background:var(--paper-2); border:1px solid var(--rule-hard); border-radius:0;
-  padding:.55rem .6rem; width:100%; min-width:0;
+  font-family:var(--font-label); font-size:1rem; font-weight:400; color:var(--bone);
+  background:var(--void); border:1px solid var(--rule); border-radius:0;
+  padding:.72rem .75rem; width:100%; min-width:0; height:3rem; line-height:1.4;
 }
-.field .hint{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.08em;color:var(--ink-soft);text-transform:none}
-.field input:focus-visible,.field select:focus-visible,button:focus-visible{outline:2px solid var(--flare);outline-offset:2px}
+.field select{appearance:none;background-image:none}
+.field input::placeholder{color:var(--bone-dim);opacity:.55}
+.field input:focus-visible,.field select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.form-actions{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin-top:1.3rem}
 button{
-  font-family:var(--font-mono); font-size:.74rem; font-weight:700; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--paper); background:var(--ink);
-  border:1px solid var(--ink); border-radius:0; padding:.72rem 1rem; cursor:pointer;
-  transition:transform .12s ease, box-shadow .12s ease; box-shadow:3px 3px 0 var(--flare);
+  font-family:var(--font-label); font-size:.82rem; font-weight:700; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--void); background:var(--gold);
+  border:1px solid var(--gold); border-radius:0; padding:.85rem 1.5rem; height:3rem;
+  cursor:pointer; transition:background .15s ease, color .15s ease, box-shadow .15s ease;
 }
-button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--flare)}
-button:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--flare)}
-button.ghost{color:var(--ink);background:transparent;box-shadow:none;border-color:var(--rule-hard);font-weight:400}
-button.ghost:hover{box-shadow:2px 2px 0 var(--rule-hard);transform:translate(-1px,-1px)}
+button:hover{background:var(--bone);border-color:var(--bone);box-shadow:0 0 22px rgba(224,165,63,.35)}
+button:focus-visible{outline:2px solid var(--spectre);outline-offset:3px}
+button.ghost{
+  color:var(--gold); background:transparent; border-color:var(--rule); font-weight:600;
+}
+button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--gold);box-shadow:none}
 .example-flag{
-  font-family:var(--font-mono); font-size:.64rem; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--flare); border:1px dashed var(--flare); padding:.3rem .5rem;
-  display:inline-block; margin-top:.9rem;
+  font-family:var(--font-label); font-size:.74rem; font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--spectre); border:1px solid rgba(79,191,168,.4);
+  padding:.45rem .7rem; display:inline-block; margin-top:1.1rem;
 }
 
-/* chart */
+/* ---- chart ---- */
 .chart{
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(7.4rem,1fr));
-  border-top:1px solid var(--rule-hard); border-left:1px solid var(--rule-hard);
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));
+  border-top:1px solid var(--rule); border-left:1px solid var(--rule); margin:0;
 }
-.chart div{
-  border-right:1px solid var(--rule-hard); border-bottom:1px solid var(--rule-hard);
-  padding:.6rem .7rem .7rem; min-width:0;
-}
+.chart div{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:.85rem .9rem .95rem;min-width:0}
 .chart dt{
-  font-family:var(--font-mono); font-size:.58rem; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--ink-soft); margin:0 0 .25rem;
+  font-family:var(--font-label); font-size:.68rem; font-weight:600; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--bone-dim); margin:0 0 .35rem;
 }
 .chart dd{
-  margin:0; font-family:var(--font-display); font-variation-settings:'WONK' 1,'opsz' 40;
-  font-size:1.1rem; font-weight:700; line-height:1.15; word-wrap:break-word;
+  margin:0; font-family:var(--font-display); font-size:1.08rem; font-weight:700;
+  line-height:1.25; color:var(--bone); word-wrap:break-word;
 }
-.chart dd .glyph{color:var(--flare);font-family:var(--font-body)}
+.chart dd .glyph{color:var(--gold);font-family:var(--font-body)}
 .chart dd small{
-  display:block; font-family:var(--font-mono); font-size:.56rem; font-weight:400;
-  letter-spacing:.08em; color:var(--ink-soft); margin-top:.2rem; text-transform:uppercase;
+  display:block; font-family:var(--font-label); font-size:.68rem; font-weight:400;
+  letter-spacing:.1em; color:var(--bone-dim); margin-top:.3rem; text-transform:uppercase;
 }
-.chart dd.rx{color:var(--flare)}
+.chart dd.rx{color:var(--oxblood)}
 
-/* cards */
-.spread{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
-@media (max-width:560px){.spread{grid-template-columns:1fr;gap:1rem}}
-.slot{display:flex;flex-direction:column;gap:.5rem;min-width:0}
+/* ---- cards ---- */
+.spread{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+@media (max-width:620px){.spread{grid-template-columns:1fr;gap:1.6rem}}
+.slot{display:flex;flex-direction:column;gap:.7rem;min-width:0}
 .slot-label{
-  font-family:var(--font-mono); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--ink-soft); display:flex; justify-content:space-between; gap:.5rem;
+  font-family:var(--font-label); font-size:.72rem; font-weight:600; letter-spacing:.18em;
+  text-transform:uppercase; display:flex; justify-content:space-between; gap:.5rem; color:var(--bone-dim);
 }
-.slot-label b{color:var(--flare);font-weight:700}
-.card{position:relative;aspect-ratio:2/3;max-width:100%;perspective:1100px}
-.card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.3,.8,.25,1)}
+.slot-label b{color:var(--gold);font-weight:700}
+.card{position:relative;aspect-ratio:2/3;max-width:100%;perspective:1200px}
+.card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.3,.8,.25,1)}
 .card.flipped .card-inner{transform:rotateY(180deg)}
 .face{
   position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
-  border:1px solid var(--ink); background:var(--paper-2);
-  display:flex; flex-direction:column; padding:.5rem; overflow:hidden;
+  border:1px solid var(--rule); background:var(--dusk-2);
+  display:flex; flex-direction:column; padding:.7rem; overflow:hidden;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.6);
 }
-.face.back{background:var(--paper-3);align-items:center;justify-content:center}
+.face.back{
+  background:var(--dusk-3); align-items:center; justify-content:center;
+}
 .face.front{transform:rotateY(180deg)}
 .back-grid{
-  position:absolute; inset:.3rem; border:1px solid var(--rule-hard);
-  background-image:radial-gradient(var(--rule-hard) 1px, transparent 1px); background-size:9px 9px;
+  position:absolute; inset:.4rem; border:1px solid var(--rule-soft);
+  background-image:radial-gradient(var(--rule) 1px, transparent 1px); background-size:11px 11px;
 }
-.back-mark{position:relative;font-family:var(--font-display);font-size:2.1rem;color:var(--flare);line-height:1;font-variation-settings:'WONK' 1}
+.back-mark{position:relative;font-family:var(--font-display);font-size:2rem;color:var(--gold);line-height:1;opacity:.8}
 .card-num{
-  font-family:var(--font-mono); font-size:.58rem; font-weight:700; letter-spacing:.12em;
-  display:flex; justify-content:space-between; gap:.3rem; color:var(--ink-soft);
+  font-family:var(--font-label); font-size:.72rem; font-weight:700; letter-spacing:.16em;
+  display:flex; justify-content:space-between; gap:.3rem; color:var(--gold);
 }
-.card-num .rev{color:var(--flare)}
-.art-box{flex:1;display:grid;place-items:center;position:relative;min-height:0;padding:.25rem 0}
+.card-num .rev{color:var(--oxblood)}
+.art-box{flex:1;display:grid;place-items:center;position:relative;min-height:0;padding:.35rem 0}
 .art{position:relative;width:100%;max-width:100%;aspect-ratio:1}
 .art svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.art svg.under{color:var(--flare);transform:translate(2.5px,2.5px);mix-blend-mode:multiply}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .art svg.under{mix-blend-mode:screen;opacity:.85}}
-:root[data-theme="dark"] .art svg.under{mix-blend-mode:screen;opacity:.85}
-.art svg.over{color:var(--ink)}
+.art svg.under{color:var(--spectre);transform:translate(2.5px,2.5px);opacity:.75}
+.art svg.over{color:var(--gold)}
 .art.reversed svg{transform-origin:50% 50%}
 .art.reversed svg.over{transform:rotate(180deg)}
 .art.reversed svg.under{transform:rotate(180deg) translate(2.5px,2.5px)}
 .card-name{
-  font-family:var(--font-display); font-variation-settings:'WONK' 1,'opsz' 30;
-  font-weight:700; font-size:.92rem; line-height:1.1; text-wrap:balance; margin:0;
+  font-family:var(--font-display); font-weight:700; font-size:1rem; line-height:1.2;
+  text-wrap:balance; margin:0; color:var(--bone);
 }
 .card-kw{
-  font-family:var(--font-mono); font-size:.55rem; letter-spacing:.08em; text-transform:uppercase;
-  color:var(--ink-soft); margin:.2rem 0 0; line-height:1.4;
+  font-family:var(--font-label); font-size:.72rem; font-weight:400; letter-spacing:.06em;
+  color:var(--bone-dim); margin:.3rem 0 0; line-height:1.5;
 }
+.slot-note{font-family:var(--font-label);font-size:.76rem;color:var(--bone-dim);margin:0;line-height:1.6}
 .reassure{
-  font-size:.86rem; line-height:1.45; margin:0; color:var(--ink);
-  border-left:2px solid var(--moss); padding-left:.5rem;
+  font-size:.95rem; line-height:1.65; margin:0; color:var(--bone);
+  border-left:2px solid var(--spectre); padding:.1rem 0 .1rem .75rem;
 }
 .reassure b{
-  display:block; font-family:var(--font-mono); font-size:.54rem; letter-spacing:.14em;
-  text-transform:uppercase; color:var(--moss); font-weight:700;
+  display:block; font-family:var(--font-label); font-size:.7rem; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--spectre); font-weight:700; margin-bottom:.2rem;
 }
 
-/* reading */
-.reading p{margin:0 0 .9rem;max-width:36rem}
+/* ---- the reading ---- */
+.reading h3{
+  font-family:var(--font-label); font-size:.78rem; font-weight:700; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--gold); margin:2rem 0 .6rem;
+  display:flex; align-items:center; gap:.8rem;
+}
+.reading h3::after{content:"";flex:1;height:1px;background:var(--rule-soft)}
+.reading h3:first-child{margin-top:0}
+.reading p{margin:0 0 1rem;max-width:62ch}
+/* Body face, not the display face. Cinzel is effectively small caps and a
+   whole paragraph of it is hard work to read. */
 .reading p.lead{
-  font-family:var(--font-display); font-variation-settings:'WONK' 1,'opsz' 60;
-  font-size:1.35rem; line-height:1.3; font-weight:400; text-wrap:balance;
+  font-size:1.3rem; line-height:1.65; font-weight:400; font-style:italic;
+  color:var(--bone); text-wrap:balance; margin-bottom:1.3rem;
 }
-.reading p.lead b{font-weight:900}
-.reading strong{font-weight:600}
-.reading .said{color:var(--flare);font-style:italic}
-.counsel{border-left:3px solid var(--flare);padding:.2rem 0 .2rem .85rem;margin-top:1.2rem;font-size:1.05rem}
+.reading p.lead strong{font-style:normal}
+.reading strong{font-weight:600;color:var(--gold)}
+.reading .said{color:var(--spectre);font-style:italic}
+.counsel{
+  border:1px solid var(--rule); border-left:3px solid var(--gold);
+  padding:1.1rem 1.2rem; margin-top:1.6rem; font-size:1.1rem; background:rgba(224,165,63,.04);
+}
 .counsel span{
-  display:block; font-family:var(--font-mono); font-size:.6rem; letter-spacing:.18em;
-  text-transform:uppercase; color:var(--ink-soft); margin-bottom:.25rem;
+  display:block; font-family:var(--font-label); font-size:.74rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:.45rem; font-weight:700;
 }
 
-/* one-off question draw */
-.oneoff{border:1px solid var(--flare);background:var(--paper-2);margin-top:1.2rem;padding:.75rem}
+/* ---- one question ---- */
+.oneoff{border:1px solid var(--rule);background:rgba(79,191,168,.04);margin-top:1.8rem;padding:1.2rem}
 .oneoff h3{
-  font-family:var(--font-mono); font-size:.62rem; letter-spacing:.16em; text-transform:uppercase;
-  margin:0 0 .5rem; color:var(--flare);
+  font-family:var(--font-label); font-size:.76rem; font-weight:700; letter-spacing:.2em;
+  text-transform:uppercase; margin:0 0 .8rem; color:var(--spectre);
 }
-.oneoff .row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:stretch}
+.oneoff .row{display:flex;flex-wrap:wrap;gap:.8rem;align-items:stretch}
 .oneoff input{
-  flex:1 1 12rem; min-width:0; font-family:var(--font-mono); font-size:.85rem;
-  color:var(--ink); background:var(--paper); border:1px solid var(--rule-hard); padding:.55rem .6rem;
+  flex:1 1 14rem; min-width:0; font-family:var(--font-label); font-size:1rem; height:3rem;
+  color:var(--bone); background:var(--void); border:1px solid var(--rule); padding:.72rem .75rem;
 }
-.oneoff .result{margin:.75rem 0 0;font-size:1rem;line-height:1.5}
-.oneoff .result b{font-family:var(--font-display);font-weight:900;font-size:1.15rem}
-.oneoff .meta{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:.4rem 0 0}
+.oneoff input:focus-visible{outline:2px solid var(--spectre);outline-offset:2px}
+.oneoff .result{margin:1rem 0 0;font-size:1.05rem;line-height:1.7;max-width:62ch}
+.oneoff .result b{font-family:var(--font-display);font-weight:700;color:var(--gold);font-size:1.15rem}
+.oneoff .meta{font-family:var(--font-label);font-size:.74rem;letter-spacing:.1em;color:var(--bone-dim);margin:.6rem 0 0}
 
-/* dials */
-.dials{display:grid;gap:.75rem}
-.dial{display:grid;grid-template-columns:5.2rem 1fr 2.6rem;gap:.7rem;align-items:center}
-.dial .nm{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
-.dial .track{
-  height:11px; border:1px solid var(--rule-hard); position:relative; min-width:0;
-  background-image:repeating-linear-gradient(90deg,var(--rule) 0 1px,transparent 1px 10%);
-}
-.dial .fill{position:absolute;inset:1px auto 1px 1px;background:var(--ink);width:0;transition:width .9s cubic-bezier(.2,.8,.2,1)}
-.dial.hot .fill{background:var(--flare)}
-.dial.cool .fill{background:var(--moss)}
-.dial .val{font-family:var(--font-mono);font-size:.74rem;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+/* ---- dials ---- */
+.dials{display:grid;gap:1rem}
+.dial{display:grid;grid-template-columns:6rem 1fr 3rem;gap:.9rem;align-items:center}
+.dial .nm{font-family:var(--font-label);font-size:.76rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--bone-dim)}
+.dial .track{height:12px;border:1px solid var(--rule);position:relative;min-width:0;background:rgba(0,0,0,.35)}
+.dial .fill{position:absolute;inset:1px auto 1px 1px;background:var(--gold);width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.dial.cool .fill{background:var(--spectre)}
+.dial.heat .fill{background:var(--oxblood)}
+.dial .val{font-family:var(--font-label);font-size:.9rem;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;color:var(--bone)}
 
-/* footer */
-.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem}
+/* ---- footer ---- */
+.actions{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.8rem;align-items:center}
 footer{
-  margin-top:2.6rem; border-top:2px solid var(--ink); padding-top:.7rem;
-  font-family:var(--font-mono); font-size:.62rem; letter-spacing:.1em; line-height:1.8;
-  color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:.3rem 1.4rem; justify-content:space-between;
+  margin-top:3.5rem; border-top:1px solid var(--rule); padding-top:1.1rem;
+  font-family:var(--font-label); font-size:.76rem; letter-spacing:.1em; line-height:2;
+  color:var(--bone-dim); display:flex; flex-wrap:wrap; gap:.3rem 1.8rem; justify-content:space-between;
 }
-footer b{color:var(--ink);font-weight:700}
-.toast{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--moss);align-self:center}
+footer b{color:var(--gold);font-weight:600}
+.toast{font-family:var(--font-label);font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--spectre)}
 
-@media (prefers-reduced-motion: reduce){*{transition-duration:.01ms !important;animation-duration:.01ms !important}}
+@media (prefers-reduced-motion: reduce){
+  *{transition-duration:.01ms !important}
+  .cat-eyes,.cat-tail{animation:none !important}
+}
 </style>
 <!--/head--></head><body><!--body-->
 <div class="wrap">
 
   <header class="mast">
-    <hr class="mast-rule">
     <div class="kicker">
-      <span id="k-date">&mdash;</span>
-      <span id="k-hour">&mdash;</span>
-      <span id="k-moon">&mdash;</span>
+      <span id="k-date">...</span>
+      <span id="k-hour">...</span>
+      <span id="k-moon">...</span>
     </div>
-    <h1>Hour <span class="amp">&amp;</span> Sign</h1>
-    <p class="dek">Three cards from a full 78-card deck, cut by your birth date and the planetary hour you ask in. The deck reshuffles eight times a day &mdash; <em>the same question gets a different answer after dark.</em></p>
-    <hr class="mast-rule thin">
+
+    <div class="mast-top">
+      <div class="mast-words">
+        <h1>Hour <span class="amp">&amp;</span> Sign</h1>
+        <p class="dek">Three cards from a full 78 card deck, cut by your birth date and the planetary hour you ask in. The deck reshuffles eight times a day, so <em>the same question gets a different answer after dark.</em></p>
+      </div>
+
+      <!-- The keeper of the deck. She blinks, and her tail moves. -->
+      <svg class="cat" viewBox="0 0 160 200" role="img" aria-label="A black cat sitting beside a crescent moon">
+        <defs>
+          <radialGradient id="catEyeGlow">
+            <stop offset="0%" stop-color="#e0a53f" stop-opacity=".45"/>
+            <stop offset="55%" stop-color="#e0a53f" stop-opacity=".10"/>
+            <stop offset="100%" stop-color="#e0a53f" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <path class="moon" d="M134 14 A 29 29 0 1 0 134 72 A 22 29 0 1 1 134 14 Z" fill="rgba(224,165,63,.06)"/>
+
+        <g class="cat-tail">
+          <path d="M104 186 C 136 192 152 166 146 146 C 142 132 126 128 120 139"
+                fill="none" stroke="#05090a" stroke-width="12" stroke-linecap="round"/>
+          <path class="rim" d="M112 188 C 138 190 150 168 145 150" style="opacity:.26"/>
+        </g>
+
+        <path class="fur" d="M80 194 C 46 194 39 150 50 118 C 56 102 66 96 80 96 C 94 96 104 102 110 118 C 121 150 114 194 80 194 Z"/>
+        <ellipse class="fur" cx="63" cy="189" rx="10" ry="6.5"/>
+        <ellipse class="fur" cx="97" cy="189" rx="10" ry="6.5"/>
+        <path class="rim" d="M50 124 C 45 150 46 174 56 188" style="opacity:.28"/>
+
+        <path class="fur" d="M52 58 L 48 24 L 73 45 Z"/>
+        <path class="fur" d="M108 58 L 112 24 L 87 45 Z"/>
+        <path class="inner-ear" d="M56 54 L 54 34 L 69 47 Z"/>
+        <path class="inner-ear" d="M104 54 L 106 34 L 91 47 Z"/>
+
+        <ellipse class="fur" cx="80" cy="74" rx="34" ry="29"/>
+        <path class="rim" d="M47 70 C 48 54 62 43 80 42" style="opacity:.33"/>
+
+        <g class="cat-eyes">
+          <ellipse cx="66" cy="74" rx="19" ry="15" fill="url(#catEyeGlow)"/>
+          <ellipse cx="94" cy="74" rx="19" ry="15" fill="url(#catEyeGlow)"/>
+          <path class="eye" d="M56 75 Q 66 65 76 75 Q 66 84 56 75 Z"/>
+          <path class="eye" d="M84 75 Q 94 65 104 75 Q 94 84 84 75 Z"/>
+          <ellipse class="slit" cx="66" cy="75" rx="1.9" ry="6.5"/>
+          <ellipse class="slit" cx="94" cy="75" rx="1.9" ry="6.5"/>
+        </g>
+
+        <path d="M76 87 L 84 87 L 80 92 Z" fill="#c04a3c" opacity=".85"/>
+        <path class="whisker" d="M60 92 L 34 87" fill="none"/>
+        <path class="whisker" d="M60 96 L 35 99" fill="none"/>
+        <path class="whisker" d="M100 92 L 126 87" fill="none"/>
+        <path class="whisker" d="M100 96 L 125 99" fill="none"/>
+      </svg>
+    </div>
+
+    <hr class="rule-deco">
 
     <details id="primer">
       <summary>New to this? Start here</summary>
       <div class="details-body">
-        <p>Nothing here is a prediction. It is a prompt &mdash; a structured way of asking yourself a question, which is roughly what tarot has always been for. Read it the way you read a horoscope in a newspaper: with your tongue somewhere near your cheek.</p>
+        <p>Nothing here is a prediction. It is a prompt, a structured way of asking yourself a question, which is roughly what tarot has always been for. Read it the way you read a horoscope in a newspaper, with your tongue somewhere near your cheek.</p>
         <dl class="gloss">
           <dt>The deck</dt>
-          <dd>All 78 cards. The 22 <strong>Major Arcana</strong> are the big thematic ones &mdash; The Fool, Death, The Star. The 56 <strong>Minor Arcana</strong> are four suits of everyday life: Wands (drive), Cups (feeling), Swords (thought), Pentacles (money and body).</dd>
+          <dd>All 78 cards. The 22 <strong>Major Arcana</strong> are the big thematic ones: The Fool, Death, The Star. The 56 <strong>Minor Arcana</strong> are four suits of everyday life. Wands for drive, Cups for feeling, Swords for thought, Pentacles for money and the body.</dd>
           <dt>Reversed</dt>
-          <dd>A card dealt upside down. It usually softens, blocks or inverts the usual meaning rather than making it "bad". You can turn reversals off below.</dd>
+          <dd>A card dealt upside down. It usually softens, blocks or inverts the usual meaning rather than making it bad. You can turn reversals off in the reading options.</dd>
           <dt>Your standing card</dt>
           <dd>One Major worked out from your birth date and yours for life. It never changes. Readers call this a birth or personality card.</dd>
           <dt>Planetary hour</dt>
           <dd>An old system giving every hour of the day a ruling planet, cycling in a fixed order. It is why Sunday is the Sun's day and Monday is the Moon's.</dd>
-          <dt>The frightening-looking cards</dt>
-          <dd>Death, The Tower, The Devil and the Three of Swords alarm nearly everyone on a first reading. None of them is literal. They are about endings, sudden clarity, habits and plain old heartbreak &mdash; and each says so on the card itself. Nothing has been removed from this deck to spare you.</dd>
+          <dt>The frightening looking cards</dt>
+          <dd>Death, The Tower, The Devil and the Three of Swords alarm nearly everyone on a first reading. None of them is literal. They are about endings, sudden clarity, habits and plain old heartbreak, and each says so on the card itself. Nothing has been removed from this deck to spare you.</dd>
         </dl>
       </div>
     </details>
@@ -351,58 +467,70 @@ footer b{color:var(--ink);font-weight:700}
       <h2 id="h-cut">Cut the deck</h2>
       <span class="note">Nothing leaves your browser</span>
     </div>
-    <form id="form" autocomplete="off">
-      <div class="field">
-        <label for="bdate">Birth date</label>
-        <input type="date" id="bdate" name="bdate" min="1900-01-01" required>
-      </div>
-      <div class="field">
-        <label for="btime">Birth hour</label>
-        <select id="btime" name="btime">
-          <option value="">don't know</option>
-        </select>
-        <span class="hint">adds a rough rising sign</span>
-      </div>
-      <div class="field">
-        <label for="deckmode">Deck</label>
-        <select id="deckmode" name="deckmode">
-          <option value="78" selected>full 78 cards</option>
-          <option value="22">22 Majors only</option>
-        </select>
-        <span class="hint">nothing is ever removed</span>
-      </div>
-      <div class="field">
-        <label for="revmode">Reversals</label>
-        <select id="revmode" name="revmode">
-          <option value="0">none &mdash; upright only</option>
-          <option value="0.32" selected>sometimes &mdash; 1 in 3</option>
-          <option value="0.5">half the deck</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="weightmode">Astrology</label>
-        <select id="weightmode" name="weightmode">
-          <option value="1" selected>weight the odds</option>
-          <option value="0">flat deck &mdash; no weighting</option>
-        </select>
-        <span class="hint">see "the odds" below</span>
-      </div>
-      <div class="field">
-        <label for="bname">Name <span aria-hidden="true">(optional)</span></label>
-        <input type="text" id="bname" name="bname" maxlength="24" placeholder="for the heading">
-      </div>
-      <div class="field">
-        <label for="draw" style="visibility:hidden">Draw</label>
-        <button type="submit" id="draw">Draw three</button>
-      </div>
-    </form>
-    <div id="example-flag" class="example-flag">Example reading below &mdash; enter your own date to replace it</div>
+
+    <div class="panel">
+      <form id="form" autocomplete="off">
+        <div class="deck-form">
+          <div class="field">
+            <label for="bdate">Birth date</label>
+            <input type="date" id="bdate" name="bdate" min="1900-01-01" required>
+          </div>
+          <div class="field">
+            <label for="btime">Birth hour <i>optional</i></label>
+            <select id="btime" name="btime">
+              <option value="">Not known</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="bname">Name <i>optional</i></label>
+            <input type="text" id="bname" name="bname" maxlength="24" placeholder="For the heading">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" id="draw">Draw three</button>
+          <span class="toast" id="toast" hidden>Copied</span>
+        </div>
+      </form>
+
+      <details id="options">
+        <summary>Reading options</summary>
+        <div class="details-body">
+          <div class="deck-form" style="margin-top:1rem">
+            <div class="field">
+              <label for="deckmode">Deck</label>
+              <select id="deckmode" name="deckmode">
+                <option value="78" selected>Full 78 cards</option>
+                <option value="22">22 Majors only</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="revmode">Reversals</label>
+              <select id="revmode" name="revmode">
+                <option value="0">None, upright only</option>
+                <option value="0.32" selected>Sometimes, 1 in 3</option>
+                <option value="0.5">Half the deck</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="weightmode">Astrology</label>
+              <select id="weightmode" name="weightmode">
+                <option value="1" selected>Weight the odds</option>
+                <option value="0">Flat deck, no weighting</option>
+              </select>
+            </div>
+          </div>
+          <p>Reversals change orientation only, never which cards appear. Weighting applies traditional correspondences to the shuffle, and is listed in full under <strong>The odds</strong> below. Nothing is ever excluded from the deck.</p>
+        </div>
+      </details>
+
+      <div id="example-flag" class="example-flag">Example reading below. Enter your own date to replace it.</div>
+    </div>
   </section>
 
   <section class="sec" aria-labelledby="h-chart">
     <div class="sec-head">
       <h2 id="h-chart">The chart</h2>
-      <span class="note" id="chart-for">&mdash;</span>
+      <span class="note" id="chart-for">...</span>
     </div>
     <dl class="chart" id="chart"></dl>
   </section>
@@ -418,12 +546,12 @@ footer b{color:var(--ink);font-weight:700}
   <section class="sec" aria-labelledby="h-reading">
     <div class="sec-head">
       <h2 id="h-reading">The reading</h2>
-      <span class="note" id="reading-stamp">&mdash;</span>
+      <span class="note" id="reading-stamp">...</span>
     </div>
     <div class="reading" id="reading" aria-live="polite"></div>
 
     <div class="oneoff">
-      <h3>Ask one question &mdash; a genuinely random single card</h3>
+      <h3>Ask one question, for a genuinely random single card</h3>
       <div class="row">
         <input type="text" id="question" maxlength="90" placeholder="Should I send the email?" aria-label="Your question">
         <button type="button" id="ask">Pull a card</button>
@@ -445,7 +573,7 @@ footer b{color:var(--ink);font-weight:700}
     <details id="odds">
       <summary>The odds, and what is bending them</summary>
       <div class="details-body">
-        <p>A flat deck gives every card the same chance. This one does not, when weighting is on: traditional correspondences raise some cards' odds for this exact hour and date. Nothing is ever excluded &mdash; the worst-weighted card still gets dealt. Here is precisely what is applied right now.</p>
+        <p>A flat deck gives every card the same chance. This one does not, when weighting is on. Traditional correspondences raise some cards' odds for this exact hour and date. Nothing is ever excluded, so the worst weighted card in the deck can still be the first one dealt. Here is precisely what is applied right now.</p>
         <table class="odds" id="odds-table"></table>
         <p id="odds-note"></p>
       </div>
@@ -454,7 +582,7 @@ footer b{color:var(--ink);font-weight:700}
     <details id="method">
       <summary>How this draw was made</summary>
       <div class="details-body">
-        <p>No server and nothing stored. The daily cards come from a seeded pseudo-random generator, so the same inputs always produce the same spread &mdash; refresh as often as you like, it will not budge until the hour turns. The one-question card above is the opposite: it uses the browser's cryptographic randomness and is different every single time.</p>
+        <p>No server, and nothing stored anywhere but your own browser. The daily cards come from a seeded pseudo random generator, so the same inputs always produce the same spread. Refresh as often as you like, it will not budge until the hour turns. The one question card above is the opposite: it uses the browser's cryptographic randomness and is different every single time.</p>
         <ul class="seedlist" id="seedlist"></ul>
         <p id="method-notes"></p>
       </div>
@@ -464,13 +592,13 @@ footer b{color:var(--ink);font-weight:700}
       <button type="button" class="ghost" id="copy">Copy reading</button>
       <button type="button" class="ghost" id="share">Copy share link</button>
       <button type="button" class="ghost" id="reshuffle">Turn the cards again</button>
-      <span class="toast" id="toast" hidden>Copied</span>
+      <span class="toast" id="toast2" hidden>Copied</span>
     </div>
   </section>
 
   <footer>
-    <span>Next shuffle in <b id="countdown">--:--:--</b></span>
-    <span>Seeded, not random &mdash; <b>same hour, same cards</b></span>
+    <span>Next shuffle in <b id="countdown">00:00:00</b></span>
+    <span>Seeded, not random. <b>Same hour, same cards.</b></span>
     <span>For fun. Not advice.</span>
   </footer>
 
@@ -511,7 +639,6 @@ function rngFrom(seedStr){
   for (let i = 0; i < 12; i++) r();
   return r;
 }
-/* Genuinely unpredictable, for the one-question draw only. */
 function cryptoRnd(){
   const a = new Uint32Array(1);
   (self.crypto || self.msCrypto).getRandomValues(a);
@@ -529,17 +656,17 @@ const MAJORS = [
   { n:"V",     name:"The Hierophant",     up:"tradition \u00b7 teaching \u00b7 ritual",           rev:"dogma \u00b7 going along with it",                       voice:"An old, unglamorous method still works.", tone:0 },
   { n:"VI",    name:"The Lovers",         up:"union \u00b7 alignment \u00b7 the choice",          rev:"discord \u00b7 split loyalty",                           voice:"Choose with your whole chest or do not choose yet.", tone:1 },
   { n:"VII",   name:"The Chariot",        up:"drive \u00b7 momentum \u00b7 the win",              rev:"spinning out \u00b7 force without aim",                  voice:"Hold the reins loosely and go fast anyway.", tone:1 },
-  { n:"VIII",  name:"Strength",           up:"courage \u00b7 soft power \u00b7 patience",         rev:"self-doubt \u00b7 brute force",                          voice:"The gentler grip is the stronger one.", tone:1 },
+  { n:"VIII",  name:"Strength",           up:"courage \u00b7 soft power \u00b7 patience",         rev:"self doubt \u00b7 brute force",                          voice:"The gentler grip is the stronger one.", tone:1 },
   { n:"IX",    name:"The Hermit",         up:"solitude \u00b7 searching \u00b7 good counsel",     rev:"hiding \u00b7 isolation dressed as focus",               voice:"Go in before you go out.", tone:0 },
-  { n:"X",     name:"Wheel of Fortune",   up:"cycles \u00b7 luck \u00b7 the turn",                rev:"resisting the turn \u00b7 bad timing",                   voice:"The wheel is mid-spin. Ride it, do not steer it.", tone:1 },
+  { n:"X",     name:"Wheel of Fortune",   up:"cycles \u00b7 luck \u00b7 the turn",                rev:"resisting the turn \u00b7 bad timing",                   voice:"The wheel is mid spin. Ride it, do not steer it.", tone:1 },
   { n:"XI",    name:"Justice",            up:"truth \u00b7 balance \u00b7 consequence",           rev:"bias \u00b7 books that do not balance",                  voice:"Say the fair thing out loud, even badly.", tone:0 },
   { n:"XII",   name:"The Hanged Man",     up:"pause \u00b7 reversal \u00b7 a new angle",          rev:"martyrdom \u00b7 stalling \u00b7 stuck upside down",     voice:"Stay upside down until it makes sense.", tone:0,
     calm:"A pause card, not a punishment. It turns up when waiting is the move." },
   { n:"XIII",  name:"Death",              up:"endings \u00b7 clearing \u00b7 real change",        rev:"clinging \u00b7 limbo",                                  voice:"Let the dead thing be dead. Something wants the space.", tone:-1,
-    calm:"Death is the change card. In several centuries of tarot it has never meant that somebody dies \u2014 traditionally it is among the most hopeful cards in the deck, because something finally ends." },
+    calm:"Death is the change card. In several centuries of tarot it has never meant that somebody dies. Traditionally it is among the most hopeful cards in the deck, because something finally ends." },
   { n:"XIV",   name:"Temperance",         up:"blending \u00b7 moderation \u00b7 the long game",   rev:"excess \u00b7 all of it at once",                        voice:"Mix slowly. Taste as you go.", tone:1 },
   { n:"XV",    name:"The Devil",          up:"appetite \u00b7 attachment \u00b7 the shadow",      rev:"release \u00b7 cutting the cord",                        voice:"Name the thing you cannot put down.", tone:-1,
-    calm:"Nothing supernatural. The Devil is the habit card \u2014 the loop you know you are in. Reversed, it is you getting out of it." },
+    calm:"Nothing supernatural. The Devil is the habit card, the loop you know you are in. Reversed, it is you getting out of it." },
   { n:"XVI",   name:"The Tower",          up:"shock \u00b7 collapse \u00b7 revelation",           rev:"a reckoning postponed",                                  voice:"What falls was already leaning.", tone:-1,
     calm:"The Tower is sudden clarity, not disaster. It marks the moment a thing you had been propping up stops needing to be propped up." },
   { n:"XVII",  name:"The Star",           up:"hope \u00b7 repair \u00b7 quiet guidance",          rev:"dimmed faith \u00b7 looking away",                       voice:"Follow the small light, not the big noise.", tone:1 },
@@ -558,7 +685,6 @@ const SUITS = [
   { key:"pentacles", name:"Pentacles", el:"Earth", of:"money and the body" }
 ];
 const RANKS = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
-/* [upright, reversed, voice, tone] in rank order */
 const MINOR = {
   wands: [
     ["a spark \u00b7 raw drive \u00b7 the green light","a false start \u00b7 nothing catching","Something just lit. Use it before it goes out.",1],
@@ -586,10 +712,10 @@ const MINOR = {
     ["too many options \u00b7 beautiful fantasy","clarity \u00b7 picking the real one","Most of those cups are empty. Choose.",0],
     ["walking away to find the rest","drifting \u00b7 leaving for no reason","Leaving is allowed. Leave properly.",0],
     ["contentment \u00b7 the wish granted","smugness \u00b7 wanting the wrong thing","Enjoy it without apologising.",1],
-    ["belonging \u00b7 shared joy \u00b7 the real thing","picture-perfect only \u00b7 performed happiness","This is the good bit. Notice it.",1],
+    ["belonging \u00b7 shared joy \u00b7 the real thing","picture perfect only \u00b7 performed happiness","This is the good bit. Notice it.",1],
     ["a tender message \u00b7 a new feeling","moodiness \u00b7 feelings used as weather","Say the soft thing first.",1],
-    ["the romantic offer \u00b7 the invitation","all charm, no follow-through","Someone is about to ask. Answer honestly.",1],
-    ["deep empathy \u00b7 intuition \u00b7 holding space","over-giving \u00b7 drowning in it","Feel it, then put it down.",1],
+    ["the romantic offer \u00b7 the invitation","all charm, no follow through","Someone is about to ask. Answer honestly.",1],
+    ["deep empathy \u00b7 intuition \u00b7 holding space","over giving \u00b7 drowning in it","Feel it, then put it down.",1],
     ["feeling held steady \u00b7 emotional command","coldness \u00b7 feeling used as leverage","Be the calm one. It is a skill.",1]
   ],
   swords: [
@@ -599,16 +725,16 @@ const MINOR = {
       "The bluntest card in the deck and the least mysterious: it means something hurt. It is not a warning about the future."],
     ["rest \u00b7 recovery \u00b7 deliberate retreat","burnout ignored \u00b7 rest refused","Stop. Actually stop, not scrolling.",0],
     ["winning badly \u00b7 a hollow victory","letting it go \u00b7 walking off the field","You can win this and still lose. Choose.",-1],
-    ["passage to calmer water","stuck mid-crossing","You are moving, even if it is slow.",1],
+    ["passage to calmer water","stuck mid crossing","You are moving, even if it is slow.",1],
     ["strategy \u00b7 or quietly sneaking","getting caught \u00b7 coming clean","Be clever, but be able to say it out loud.",0],
-    ["trapped by your own thinking","stepping out \u00b7 the rope was loose","The binding is self-tied. Check it.",-1],
+    ["trapped by your own thinking","stepping out \u00b7 the rope was loose","The binding is self tied. Check it.",-1],
     ["three in the morning \u00b7 dread","the light coming \u00b7 it was smaller than that","It is worse at night. It always is.",-1,
       "The anxiety card. It describes the 3am spiral, not an event coming for you. Reversed, it is the spiral ending."],
     ["the end of it \u00b7 rock bottom","slow recovery \u00b7 the worst is behind","It is over. That is the good news.",-1,
       "Dramatic picture, ordinary meaning: a thing has definitively ended. Rock bottom is still a floor to stand on."],
     ["curiosity \u00b7 watching \u00b7 early news","snooping \u00b7 nerves \u00b7 overthinking","Ask the question you are circling.",0],
     ["full speed \u00b7 blunt \u00b7 argumentative","rushing in \u00b7 all edge, no aim","Say it straight, then stop talking.",0],
-    ["clear-eyed, unsentimental honesty","coldness \u00b7 honesty as a weapon","Be kind and accurate. Both.",0],
+    ["clear eyed, unsentimental honesty","coldness \u00b7 honesty as a weapon","Be kind and accurate. Both.",0],
     ["judgement \u00b7 intellectual authority","the tyranny of being right","Decide. You have enough information.",0]
   ],
   pentacles: [
@@ -621,7 +747,7 @@ const MINOR = {
     ["generosity \u00b7 fair exchange","strings attached \u00b7 uneven giving","Give, or ask. Both are allowed.",1],
     ["the long wait on an investment","impatience \u00b7 digging it up to check","It is growing. Stop checking.",0],
     ["diligence \u00b7 practice \u00b7 apprenticeship","going through the motions","Reps. Boring, unbeatable reps.",1],
-    ["self-made comfort \u00b7 earned ease","the golden cage \u00b7 comfort as a trap","You built this. Sit in it.",1],
+    ["self made comfort \u00b7 earned ease","the golden cage \u00b7 comfort as a trap","You built this. Sit in it.",1],
     ["legacy \u00b7 family \u00b7 the long view","family money trouble \u00b7 old obligations","Think in decades for one minute.",1],
     ["a student \u00b7 a new venture \u00b7 first steps","procrastination \u00b7 the unopened book","Begin the small practical thing today.",1],
     ["slow, reliable, unglamorous progress","stagnation \u00b7 stuck in the mud","Dull and steady wins this one.",1],
@@ -630,7 +756,6 @@ const MINOR = {
   ]
 };
 
-/* Build the full deck. Majors are 0-21; minors follow in suit order. */
 const DECK = MAJORS.map((m, i) => ({ ...m, id:i, major:true, suit:null, rank:null }));
 SUITS.forEach(suit => {
   MINOR[suit.key].forEach((entry, r) => {
@@ -670,7 +795,7 @@ function signIndex(month, day){
     const s = SIGNS[i], fm = s.from[0], fd = s.from[1], tm = s.to[0], td = s.to[1];
     if (fm <= tm){
       if ((month === fm && day >= fd) || (month === tm && day <= td) || (month > fm && month < tm)) return i;
-    } else {                                   /* Capricorn wraps the year end */
+    } else {
       if ((month === fm && day >= fd) || (month === tm && day <= td)) return i;
     }
   }
@@ -684,20 +809,20 @@ function risingSign(sunIdx, birthHour){
 
 /* ============ planetary hours, Chaldean order ============ */
 const CHALDEAN = ["Saturn","Jupiter","Mars","Sun","Venus","Mercury","Moon"];
-const DAY_RULER = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];  /* 0 = Sunday */
+const DAY_RULER = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
 const PLANETS = {
-  Saturn:  { glyph:"\u2644", mood:"slow, serious and allergic to shortcuts", do:"and do it slowly." },
-  Jupiter: { glyph:"\u2643", mood:"generous and a little over-confident",    do:"and ask for more than you need." },
-  Mars:    { glyph:"\u2642", mood:"sharp-edged and impatient",               do:"and do it now." },
-  Sun:     { glyph:"\u2609", mood:"bright, visible, hard to hide in",        do:"where people can see." },
-  Venus:   { glyph:"\u2640", mood:"soft, sociable, easily charmed",          do:"with someone you like." },
-  Mercury: { glyph:"\u263f", mood:"quick, talkative and prone to typos",     do:"and get it in writing." },
-  Moon:    { glyph:"\u263e", mood:"tidal and a bit dreamlike",               do:"and do not explain yourself." }
+  Saturn:  { glyph:"\u2644", mood:"slow, serious and allergic to shortcuts", do:"and do it slowly.", of:"limits, patience and old debts" },
+  Jupiter: { glyph:"\u2643", mood:"generous and a little over confident",    do:"and ask for more than you need.", of:"luck, scale and generosity" },
+  Mars:    { glyph:"\u2642", mood:"sharp edged and impatient",               do:"and do it now.", of:"heat, conflict and getting started" },
+  Sun:     { glyph:"\u2609", mood:"bright, visible, hard to hide in",        do:"where people can see.", of:"clarity, pride and being seen" },
+  Venus:   { glyph:"\u2640", mood:"soft, sociable, easily charmed",          do:"with someone you like.", of:"pleasure, taste and other people" },
+  Mercury: { glyph:"\u263f", mood:"quick, talkative and prone to typos",     do:"and get it in writing.", of:"messages, deals and quick thinking" },
+  Moon:    { glyph:"\u263e", mood:"tidal and a bit dreamlike",               do:"and do not explain yourself.", of:"mood, memory and the half remembered" }
 };
 function planetaryHour(date){
   const dow = date.getDay();
   let h = date.getHours() - 6, d = dow;
-  if (h < 0){ h += 24; d = (dow + 6) % 7; }          /* pre-dawn belongs to yesterday's run */
+  if (h < 0){ h += 24; d = (dow + 6) % 7; }
   const start = CHALDEAN.indexOf(DAY_RULER[d]);
   return { ruler:CHALDEAN[(start + h) % 7], dayRuler:DAY_RULER[d], hourIndex:h };
 }
@@ -716,48 +841,43 @@ const watchBlock = d => Math.floor(d.getHours() / 3);
 /* ============ moon ============ */
 const MOONS = [
   { name:"New Moon",        phrase:"start the thing nobody has to hear about yet", dir:"waxing" },
-  { name:"Waxing Crescent", phrase:"it is small and it is working, do not poke it", dir:"waxing" },
-  { name:"First Quarter",   phrase:"this is the friction part, it is supposed to be here", dir:"waxing" },
-  { name:"Waxing Gibbous",  phrase:"nearly there, tighten rather than redesign", dir:"waxing" },
+  { name:"Waxing Crescent", phrase:"it is small and it is working, so do not poke it", dir:"waxing" },
+  { name:"First Quarter",   phrase:"this is the friction part, and it is supposed to be here", dir:"waxing" },
+  { name:"Waxing Gibbous",  phrase:"nearly there, so tighten rather than redesign", dir:"waxing" },
   { name:"Full Moon",       phrase:"everything is lit, nothing is hidden, nobody is sleeping", dir:"full" },
-  { name:"Waning Gibbous",  phrase:"say the thank-yous while you still mean them", dir:"waning" },
-  { name:"Last Quarter",    phrase:"cut one commitment, you know which one", dir:"waning" },
+  { name:"Waning Gibbous",  phrase:"say the thank yous while you still mean them", dir:"waning" },
+  { name:"Last Quarter",    phrase:"cut one commitment, and you know which one", dir:"waning" },
   { name:"Waning Crescent", phrase:"rest is not the reward, it is the step", dir:"waning" }
 ];
 function moonInfo(date){
-  const REF = Date.UTC(2000, 0, 6, 18, 14);          /* a known new moon */
-  const SYN = 29.530588853;                          /* mean synodic month */
+  const REF = Date.UTC(2000, 0, 6, 18, 14);
+  const SYN = 29.530588853;
   const age = (((date.getTime() - REF) / 86400000) % SYN + SYN) % SYN;
   const idx = Math.floor(((age / SYN) * 8 + 0.5)) % 8;
   const lit = Math.round((1 - Math.cos((age / SYN) * 2 * Math.PI)) / 2 * 100);
   return { idx, age, lit, ...MOONS[idx] };
 }
 
-/* ============ Mercury retrograde, approximated ============
-   Mercury's synodic period is 115.88 days and it spends roughly 19% of each one
-   apparently retrograde. Modelled as a repeating window from a known retrograde
-   midpoint. Good to within a few days, which is why the page says "approx" and
-   the README explains how to drop in an exact table instead. */
+/* ============ Mercury retrograde, approximated ============ */
 const MERCURY_SYNODIC = 115.88;
 const MERCURY_RX_FRACTION = 0.19;
-const MERCURY_RX_EPOCH = Date.UTC(2025, 2, 26);      /* a retrograde midpoint */
+const MERCURY_RX_EPOCH = Date.UTC(2025, 2, 26);
 function mercuryRetrograde(date){
   const days = (date.getTime() - MERCURY_RX_EPOCH) / 86400000;
   let phase = ((days % MERCURY_SYNODIC) + MERCURY_SYNODIC) % MERCURY_SYNODIC;
-  if (phase > MERCURY_SYNODIC / 2) phase -= MERCURY_SYNODIC;   /* centre on 0 */
+  if (phase > MERCURY_SYNODIC / 2) phase -= MERCURY_SYNODIC;
   const half = (MERCURY_SYNODIC * MERCURY_RX_FRACTION) / 2;
-  const active = Math.abs(phase) <= half;
-  return { active, daysFromCentre:Math.round(phase), approx:true };
+  return { active:Math.abs(phase) <= half, daysFromCentre:Math.round(phase) };
 }
 
-/* ============ chinese year (Lichun, 4 Feb, as the cutoff) ============ */
+/* ============ chinese year ============ */
 const ANIMALS = ["Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat","Monkey","Rooster","Dog","Pig"];
 function animalFor(y, m, d){
   const yy = (m < 2 || (m === 2 && d < 4)) ? y - 1 : y;
   return ANIMALS[(((yy - 4) % 12) + 12) % 12];
 }
 
-/* ============ birth cards, Mary Greer's method ============ */
+/* ============ birth cards, Greer's method ============ */
 const digitSum = n => String(n).split("").reduce((a, c) => a + Number(c), 0);
 function birthCards(y, m, d){
   let t = m + d + y;
@@ -768,66 +888,48 @@ function birthCards(y, m, d){
   return { personality, soul:s };
 }
 
-/* ============ traditional correspondences ============
-   Golden Dawn attributions, not inventions: each planet and each zodiac sign has
-   a long-standing Major Arcana card. These are what bend the odds. */
+/* ============ traditional correspondences ============ */
 const PLANET_MAJOR = { Sun:19, Moon:2, Mars:16, Mercury:1, Jupiter:10, Venus:3, Saturn:21 };
 const SIGN_MAJOR = {
   Aries:4, Taurus:5, Gemini:6, Cancer:7, Leo:8, Virgo:9,
   Libra:11, Scorpio:13, Sagittarius:14, Capricorn:15, Aquarius:17, Pisces:18
 };
-/* Cards traditionally read as beginnings, and as endings. */
 const WAXING_MAJORS = [0, 1, 3, 6, 7, 17, 19];
 const WANING_MAJORS = [9, 12, 13, 16, 18, 20, 21];
-/* Mercury retrograde: miscommunication, revisiting, delay. Its own card plus the
-   suit of thought and speech. */
 const MERCURY_RX_MAJORS = [1, 10, 12, 18, 20];
 
-/* Returns {weights:Float64Array, reasons:[...]} for the current moment. */
 function deckWeights(ids, ctx, slot){
   const w = {}, reasons = [];
   ids.forEach(id => { w[id] = 1; });
   if (!ctx.weighted) return { w, reasons };
-
   const bump = (list, mult, why) => {
     const hit = list.filter(id => w[id] !== undefined);
     if (!hit.length) return;
     hit.forEach(id => { w[id] *= mult; });
     reasons.push({ mult, why, cards:hit.map(id => DECK[id].name) });
   };
-
   if (slot === "hour"){
     const pm = PLANET_MAJOR[ctx.ph.ruler];
     bump([pm], 2.5, "This is an hour of " + ctx.ph.ruler + ", whose card is " + DECK[pm].name);
   }
   if (slot === "turn"){
     const seasonSign = signFor(ctx.now.getMonth() + 1, ctx.now.getDate()).name;
-    const sm = SIGN_MAJOR[seasonSign];
-    bump([sm], 2.0, "The sun is in " + seasonSign + ", whose card is " + DECK[sm].name);
+    bump([SIGN_MAJOR[seasonSign]], 2.0, "The sun is in " + seasonSign + ", whose card is " + DECK[SIGN_MAJOR[seasonSign]].name);
   }
-  /* Moon direction favours beginnings or endings. */
   if (ctx.moon.dir === "waxing") bump(WAXING_MAJORS, 1.6, "A waxing moon favours the cards of beginning");
   else if (ctx.moon.dir === "waning") bump(WANING_MAJORS, 1.6, "A waning moon favours the cards of ending and release");
   else bump(WAXING_MAJORS.concat(WANING_MAJORS), 1.25, "A full moon lifts both the beginnings and the endings");
-
-  /* Mercury retrograde. */
   if (ctx.rx.active){
     bump(MERCURY_RX_MAJORS, 1.8, "Mercury is retrograde: delay, review and the misread message");
     const swords = ids.filter(id => DECK[id].suit === "swords");
     if (swords.length) bump(swords, 1.4, "Mercury retrograde also lifts Swords, the suit of speech and thought");
   }
-  /* Your own element gets a little more of its own suit. */
   const mySuit = ELEMENTS[ctx.sign.el].suit;
   const mine = ids.filter(id => DECK[id].suit === mySuit);
-  if (mine.length) bump(mine, 1.35, "You are a " + ctx.sign.el + " sign, so " + ELEMENTS[ctx.sign.el].suit + " run a little hotter");
-
+  if (mine.length) bump(mine, 1.35, "You are a " + ctx.sign.el + " sign, so " + mySuit + " run a little hotter");
   return { w, reasons };
 }
 
-/* Weighted shuffle without replacement, deterministic for a given rng.
-   Uses the exponential-sort trick: key = -ln(u)/weight, ascending. A card with
-   twice the weight is twice as likely to come off the top, and no card can ever
-   be excluded, because every weight stays above zero. */
 function weightedOrder(ids, w, rnd){
   return ids.map(id => {
     const u = Math.max(rnd(), 1e-12);
@@ -837,10 +939,15 @@ function weightedOrder(ids, w, rnd){
 
 /* ============ the draw ============ */
 const SLOTS = [
-  { label:"The Hour",    note:"now",      intent:"what this stretch of the day is handing you" },
-  { label:"The Sign",    note:"standing", intent:"the shape you keep returning to" },
-  { label:"The Turning", note:"today",    intent:"what is moving underneath" }
+  { label:"The Hour",    note:"now",      intent:"What this stretch of the day is handing you" },
+  { label:"The Sign",    note:"standing", intent:"The shape you keep returning to" },
+  { label:"The Turning", note:"today",    intent:"What is moving underneath" }
 ];
+/* 1st, 2nd, 3rd, 4th ... 21st, 22nd. The naive version said "21th hour". */
+function ordinal(n){
+  const s = ["th","st","nd","rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
 
 function drawSpread(ctx){
   const { bY, bM, bD, bHour, now, wb, moon, revRate, deckSize } = ctx;
@@ -851,11 +958,6 @@ function drawSpread(ctx){
 
   const all = (deckSize === 22 ? MAJOR_IDS : DECK.map(c => c.id)).filter(id => id !== personality);
 
-  /* The whole day is dealt in one pass, watch by watch, drawing each card out
-     of the pool so it cannot come back. Each watch is weighted by ITS OWN
-     planetary ruler, which is why the deal has to be sequential: weighting the
-     deck once with the current hour's planet re-ordered it every three hours
-     and brought card repeats back on 48% of days. */
   const rDay = rngFrom("day|" + birthKey + "|" + dayKey);
   let pool = all.slice();
   const hand = [];
@@ -864,22 +966,18 @@ function drawSpread(ctx){
     const atWatch = new Date(now.getFullYear(), now.getMonth(), now.getDate(), b * 3);
     const wctx = { ...ctx, ph:planetaryHour(atWatch) };
     const ww = deckWeights(pool, wctx, "hour");
-    if (b === wb) hourW = ww;                       /* the odds we report are this watch's */
+    if (b === wb) hourW = ww;
     const id = weightedOrder(pool, ww.w, rDay)[0];
     hand.push(id);
     pool = pool.filter(x => x !== id);
   }
   const iHour = hand[wb];
 
-  /* The day's card comes from what the eight watches left behind, under its own
-     weighting, and does not depend on which watch you happen to be asking in. */
   const turnW = deckWeights(pool, ctx, "turn");
   const rTurn = rngFrom("turn|" + birthKey + "|" + dayKey + "|" + moon.idx + "|" + signFor(now.getMonth() + 1, now.getDate()).name);
   const iTurn = weightedOrder(pool, turnW.w, rTurn)[0];
 
-  /* Two orientation seeds. The hour card may turn over when the watch turns; the
-     day's card must not, or it flips upside down every three hours. */
-  const rxBonus = ctx.rx.active ? 0.10 : 0;          /* retrograde tips more cards over */
+  const rxBonus = ctx.rx.active ? 0.10 : 0;
   const effRate = revRate === 0 ? 0 : Math.min(0.95, revRate + rxBonus);
   const rRevHour = rngFrom("rev-hour|" + birthKey + "|" + dayKey + "|" + wb);
   const rRevDay  = rngFrom("rev-day|" + birthKey + "|" + dayKey);
@@ -898,9 +996,7 @@ function drawSpread(ctx){
   };
 }
 
-/* ============ card art ============
-   Majors get a generated geometric emblem; minors get their suit mark laid out
-   in the traditional pip arrangement, with court cards marked by rank. */
+/* ============ card art ============ */
 function suitMark(suit, x, y, s){
   const g = v => Math.round(v * 100) / 100;
   if (suit === "wands")
@@ -922,7 +1018,6 @@ function suitMark(suit, x, y, s){
     '<circle cx="0" cy="0" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
     '<polygon points="0,-4.2 1,-1.3 4,-1.3 1.6,0.5 2.5,3.4 0,1.6 -2.5,3.4 -1.6,0.5 -4,-1.3 -1,-1.3" fill="currentColor"/></g>';
 }
-/* Traditional pip layouts, as column/row offsets in a 100-unit square. */
 const PIPS = {
   1:[[50,50]],
   2:[[50,30],[50,70]],
@@ -940,13 +1035,11 @@ function cardArt(card){
   const parts = ['<circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="0.8"/>'];
   if (card.rank < 10){
     const layout = PIPS[card.rank + 1];
-    /* Aces are traditionally one large emblem, so they get the court-card size. */
     const scale = card.rank === 0 ? 4.6 : (card.rank + 1 >= 9 ? 1.5 : (card.rank + 1 >= 6 ? 1.8 : 2.3));
     layout.forEach(p => parts.push(suitMark(card.suit, p[0], p[1], scale)));
   } else {
-    /* Court cards: one large mark over a rank bar of 1-4 notches. */
     parts.push(suitMark(card.suit, 50, 44, 4.2));
-    const notches = card.rank - 9;                   /* Page 1 ... King 4 */
+    const notches = card.rank - 9;
     for (let i = 0; i < notches; i++){
       const x = 50 + (i - (notches - 1) / 2) * 10;
       parts.push('<rect x="' + (x - 3) + '" y="76" width="6" height="6" fill="currentColor"/>');
@@ -967,14 +1060,11 @@ function majorArt(i){
     return [C + rad * Math.cos(a), C + rad * Math.sin(a)];
   };
   const f = n => Math.round(n * 100) / 100;
-
   parts.push('<circle cx="50" cy="50" r="' + (R1 + 4) + '" fill="none" stroke="currentColor" stroke-width="1"/>');
   if (i % 3 === 0) parts.push('<circle cx="50" cy="50" r="' + (R1 + 7.5) + '" fill="none" stroke="currentColor" stroke-width="0.6"/>');
-
   const poly = [];
   for (let k = 0; k < sides; k++){ const p = pt(k, R2, sides, rot); poly.push(f(p[0]) + "," + f(p[1])); }
   parts.push('<polygon points="' + poly.join(" ") + '" fill="none" stroke="currentColor" stroke-width="1.5"/>');
-
   for (let k = 0; k < sides; k++){
     const a = pt(k, R2, sides, rot), b = pt((k + skip) % sides, R2, sides, rot);
     parts.push('<line x1="' + f(a[0]) + '" y1="' + f(a[1]) + '" x2="' + f(b[0]) + '" y2="' + f(b[1]) + '" stroke="currentColor" stroke-width="0.8"/>');
@@ -994,85 +1084,138 @@ function majorArt(i){
   if (core === 1) parts.push('<rect x="43" y="43" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" transform="rotate(' + (rot % 90) + ' 50 50)"/>');
   if (core === 2) parts.push('<polygon points="50,41 58,56 42,56" fill="currentColor"/>');
   if (core === 3) parts.push('<path d="M42 50 A8 8 0 0 1 58 50 A8 8 0 0 0 42 50" fill="currentColor"/>');
-
   const arc = 22 + (i % 6) * 4;
   parts.push('<path d="M ' + f(C - R1 - 9) + ' 50 A ' + (R1 + 9) + ' ' + (R1 + 9) + ' 0 0 1 ' + f(C + R1 + 9) + ' 50" fill="none" stroke="currentColor" stroke-width="0.7" stroke-dasharray="' + arc + ' 6" transform="rotate(' + rot + ' 50 50)"/>');
   return '<svg viewBox="-4 -4 108 108" aria-hidden="true">' + parts.join("") + "</svg>";
 }
 
-/* ============ the reading ============ */
+/* ============ the reading ============
+   Five sections rather than one block of prose: the hour, your chart, the
+   three cards one at a time, how they read together, and what to do. The
+   synthesis section uses elemental dignities, which is how readers actually
+   weigh two cards sitting next to each other. */
+const DIGNITY = {
+  Fire:{ Fire:"doubled", Air:"friendly", Water:"opposed", Earth:"neutral" },
+  Air:{ Air:"doubled", Fire:"friendly", Earth:"opposed", Water:"neutral" },
+  Water:{ Water:"doubled", Earth:"friendly", Fire:"opposed", Air:"neutral" },
+  Earth:{ Earth:"doubled", Water:"friendly", Air:"opposed", Fire:"neutral" }
+};
+const DIGNITY_TEXT = {
+  doubled:"They are the same element, which doubles the signal. Whatever they are saying, they are saying it twice, so do not look for a second meaning.",
+  friendly:"Their elements get on, so they are pulling in the same direction. The easier of the two is the one to act on first.",
+  opposed:"Their elements are opposed, which traditionally weakens both. Expect the day to feel like two instructions at once, and expect neither to be urgent.",
+  neutral:"Their elements neither help nor hinder each other. Read them as two separate pieces of news rather than one story."
+};
+
 function compose(ctx, cards, soul, rnd){
-  const { sign, rising, watch, ph, moon, animal, name, rx } = ctx;
+  const { sign, rising, watch, ph, moon, animal, name, rx, weighted } = ctx;
   const el = ELEMENTS[sign.el];
   const planet = PLANETS[ph.ruler];
   const hc = cards[0], sc = cards[1], tc = cards[2];
   const kw = c => (c.rev ? c.card.rev : c.card.up).split(" \u00b7 ")[0];
-  const who = name ? name + ", you're" : "You're";
+  const full = c => (c.rev ? c.card.rev : c.card.up);
+  const who = name ? name : "You";
+  const art = p => (p === "Sun" || p === "Moon") ? "the " + p : p;
+  const cardEl = c => c.card.major ? null : c.card.el;
+  const out = [];
 
-  const opener = pick(rnd, [
-    "<b>" + watch.name + "</b>, and " + watch.phrase + ".",
-    "It is <b>" + watch.name + "</b> &mdash; " + watch.phrase + ".",
-    "<b>" + watch.name + "</b> is holding the deck, and " + watch.phrase + "."
-  ]);
-  const art = p => (p === "Sun" || p === "Moon") ? "the " + p : p;   /* "an hour of the Sun" */
-  const hourLine = "This is an hour of <strong>" + art(ph.ruler) + "</strong> " + planet.glyph +
-    " &mdash; " + planet.mood + " &mdash; on a day ruled by " + art(ph.dayRuler) + "." +
-    (rx.active ? " <strong>Mercury is retrograde</strong>, so the deck is leaning on the cards of delay, review and the misread message." : "");
+  /* 1. the hour */
+  out.push('<h3>The hour</h3>');
+  out.push('<p class="lead">' + pick(rnd, [
+    "It is <strong>" + watch.name + "</strong>, and " + watch.phrase + ".",
+    "<strong>" + watch.name + "</strong> is holding the deck, and " + watch.phrase + ".",
+    "<strong>" + watch.name + "</strong>, which means " + watch.phrase + "."
+  ]) + "</p>");
+  out.push("<p>By the old reckoning this is an hour of <strong>" + art(ph.ruler) + "</strong> " + planet.glyph +
+    ", the " + ordinal(ph.hourIndex + 1) +
+    " hour after sunrise on a day ruled by " + art(ph.dayRuler) + ". " +
+    art(ph.ruler).charAt(0).toUpperCase() + art(ph.ruler).slice(1) + " governs " + planet.of +
+    ", and the hour is " + planet.mood + ". That is the weather the cards are being dealt into.</p>");
+  if (rx.active){
+    out.push("<p><strong>Mercury is retrograde</strong>, give or take a few days. The deck leans on the cards of delay, review and the misread message while it lasts, and it tips more cards upside down than usual. Read twice, send once.</p>");
+  }
 
-  const chartLine = pick(rnd, [
-    who + " a <strong>" + sign.name + "</strong> sun &mdash; " + sign.trait + " &mdash; so your default move is to " + el.grain + ".",
-    who + " <strong>" + sign.name + "</strong>: " + sign.trait + ". " + sign.el + " runs " + el.verb + ", and that is the " + el.kin + " you are working with today.",
-    who + " <strong>" + sign.name + "</strong> under " + sign.ruler + ", which means " + sign.trait + ". " + el.verb.charAt(0).toUpperCase() + el.verb.slice(1) + ", every time."
-  ]) + (rising ? " With <strong>" + rising.name + "</strong> rising, that is not what people meet first &mdash; they get " + rising.trait + "." : "");
+  /* 2. your chart */
+  out.push('<h3>Your chart</h3>');
+  out.push("<p>" + who + " " + (name ? "is" : "are") + " a <strong>" + sign.name + "</strong> sun, " + sign.trait +
+    ". That puts you under " + sign.ruler + " and in the element of " + sign.el + ", which runs " + el.verb +
+    ". Your default move, when nothing else is pressing, is to " + el.grain + ".</p>");
+  out.push("<p>" + (rising
+    ? "With <strong>" + rising.name + "</strong> rising, that is not the version people meet first. They get " + rising.trait +
+      ", and have to stay a while to find the " + sign.name + " underneath. "
+    : "No birth hour given, so there is no rising sign here. Add one above and you get the mask as well as the face. ") +
+    "The moon is <strong>" + moon.name + "</strong> at " + moon.lit + " per cent lit, which is the part of the month where " + moon.phrase +
+    ". You were born in a <strong>" + animal + "</strong> year, which mostly means " +
+    pick(rnd, ["you will get away with it", "people underestimate your timing", "stubbornness counts as a strategy here", "you are owed a favour somewhere"]) + ".</p>");
 
-  const line = (c, variants) => pick(rnd, variants) + ' <span class="said">' + c.card.voice + "</span>";
-  const hourCard = line(hc, [
-    "The hour deals you <strong>" + hc.card.name + "</strong>" + (hc.rev ? ", reversed" : "") + " &mdash; " + kw(hc) + ".",
-    "For right now: <strong>" + hc.card.name + "</strong>" + (hc.rev ? " reversed" : "") + ", which is " + kw(hc) + ".",
-    "<strong>" + hc.card.name + "</strong>" + (hc.rev ? " comes up reversed" : " comes up clean") + " for this watch &mdash; " + kw(hc) + "."
-  ]);
-  const signLine = pick(rnd, [
-    "Your standing card never changes: <strong>" + sc.card.name + "</strong>, " + kw(sc) + ". It is the thing you are always secretly doing.",
-    "Underneath all of it sits <strong>" + sc.card.name + "</strong> &mdash; " + kw(sc) + " &mdash; worked out from your birth date and yours for good.",
-    "The card you were born holding is <strong>" + sc.card.name + "</strong>: " + kw(sc) + ". Everything else this week is a variation on it."
-  ]) + (soul !== sc.idx ? " Reduce it once more and you get <strong>" + DECK[soul].name + "</strong>, the quieter engine underneath." : "");
-  const turnLine = line(tc, [
-    "What is turning: <strong>" + tc.card.name + "</strong>" + (tc.rev ? ", reversed" : "") + " &mdash; " + kw(tc) + ".",
-    "Today's card is <strong>" + tc.card.name + "</strong>" + (tc.rev ? " reversed" : "") + ": " + kw(tc) + ".",
-    "Moving underneath you &mdash; <strong>" + tc.card.name + "</strong>" + (tc.rev ? " reversed" : "") + ", " + kw(tc) + "."
-  ]);
+  /* 3. the three cards */
+  out.push('<h3>The three cards</h3>');
+  out.push("<p><strong>" + hc.card.name + (hc.rev ? ", reversed" : "") + "</strong> sits in the hour. " +
+    "This is the card for this stretch of the day only, dealt off the hand your deck was shuffled into at midnight, and it will be a different one when the watch turns. " +
+    "It reads as " + full(hc) + ". " +
+    (hc.card.major ? "Being a Major, it is talking about the shape of things rather than an errand. "
+                   : "It is a " + hc.card.suitName + " card, so it is pointing at " + SUITS.find(s => s.key === hc.card.suit).of + " rather than anything grander. ") +
+    '<span class="said">' + hc.card.voice + "</span></p>");
 
-  const suitNote = (!hc.card.major || !tc.card.major)
-    ? " Suits in play: " + [hc, tc].filter(c => !c.card.major)
-        .map(c => "<strong>" + c.card.suitName + "</strong> (" + SUITS.find(s => s.key === c.card.suit).of + ")")
-        .join(" and ") + "."
-    : " Two Majors in one spread &mdash; this is a week with a theme rather than a to-do list.";
+  out.push("<p><strong>" + sc.card.name + "</strong> is your standing card, and unlike the other two it never moves. " +
+    "It comes out of the arithmetic of your birth date rather than any shuffle, which is why readers call it a birth or personality card. " +
+    "It reads as " + full(sc) + ", and it is the thing you keep doing whether or not you meant to. " +
+    (soul !== sc.idx ? "Reduce it once more and you get <strong>" + DECK[soul].name + "</strong>, the quieter engine underneath the obvious one. " : "It reduces to itself, which is unusual and makes it louder than most. ") +
+    '<span class="said">' + sc.card.voice + "</span></p>");
 
-  const moonLine = "The moon is <strong>" + moon.name + "</strong> at " + moon.lit + "% lit, " + moon.phrase +
-    ". You are a <strong>" + animal + "</strong> year, which mostly means " +
-    pick(rnd, ["you will get away with it", "people underestimate the timing", "stubbornness counts as a strategy here", "you are owed a favour somewhere"]) + ".";
+  out.push("<p><strong>" + tc.card.name + (tc.rev ? ", reversed" : "") + "</strong> is the turning, drawn from what the eight watches left behind and weighted by the season rather than the hour. " +
+    "It holds its face and its orientation all day, so this one is today's news rather than this afternoon's. " +
+    "It reads as " + full(tc) + ". " +
+    '<span class="said">' + tc.card.voice + "</span></p>");
 
+  /* 4. how they read together */
+  out.push('<h3>Reading them together</h3>');
+  const majors = cards.filter(c => c.card.major).length;
+  const revs = cards.filter(c => c.rev).length;
+  const suitsInPlay = [...new Set(cards.filter(c => !c.card.major).map(c => c.card.suitName))];
+  let together = "";
+  if (majors === 3) together = "All three are Major Arcana, which is rare and not subtle. This is a week with a theme rather than a to do list, and none of it is really about the errands.";
+  else if (majors === 2) together = "Two of the three are Majors. The big machinery is doing most of the talking, and the one Minor is the practical handle on it.";
+  else if (majors === 1) together = "One Major and two Minors is the ordinary, workable mix: a theme, and two specific places it shows up.";
+  else together = "No Majors at all, which is a quietly good sign. Nothing fated is in play, so everything here is yours to simply handle.";
+  if (suitsInPlay.length) together += " The suits in play are " + suitsInPlay.join(" and ") + ", so the action sits in " +
+    suitsInPlay.map(s => SUITS.find(x => x.name === s).of).join(" and ") + ".";
+  out.push("<p>" + together + "</p>");
+
+  const he = cardEl(hc), te = cardEl(tc);
+  if (he && te){
+    out.push("<p>" + DIGNITY_TEXT[DIGNITY[he][te]] + " (That is elemental dignity, which is how readers weigh two cards sitting beside each other: " +
+      he + " and " + te + " in this case.)</p>");
+  } else if (!hc.card.major || !tc.card.major){
+    out.push("<p>Only one of the moving cards carries an element, so there is no dignity to weigh between them. Read the Major as the setting and the Minor as the thing that actually happens in it.</p>");
+  }
+
+  if (revs === 0) out.push("<p>Nothing is reversed today. Everything is arriving the way up it was meant to, which makes this a straightforward read even where the cards are heavy.</p>");
+  else if (revs === 1) out.push("<p>One card is reversed, which is the usual amount. Treat it as the same idea running slower, or blocked, rather than its opposite.</p>");
+  else out.push("<p>Both moving cards are reversed. That is a lot of friction for one day. It rarely means bad news, but it does mean nothing is going to arrive by the front door.</p>");
+
+  const tone = cards.reduce((a, c) => a + (c.rev ? -c.card.tone : c.card.tone), 0);
+  out.push("<p>" + (tone >= 3 ? "Taken together the spread is unusually bright. If you have been waiting for a good day to ask for something, this is it."
+    : tone >= 1 ? "The balance of the spread tilts gently positive. Not a parade, but the wind is behind you."
+    : tone === 0 ? "The spread balances out to nothing in particular, which is its own kind of answer: today is yours to push one way or the other."
+    : tone >= -2 ? "The spread leans heavy. Nothing here is a disaster, but it is a day for maintenance rather than ambition."
+    : "This is a heavy spread. Lower the bar, finish one thing, and let the rest wait for the hour to turn.") + "</p>");
+
+  if (!weighted){
+    out.push("<p>Weighting is off, so this came from a perfectly flat deck. Every one of the cards had exactly the same chance of turning up, which some readers consider the only honest way to do it.</p>");
+  }
+
+  /* 5. what to do */
   const counselBank = {
     Fire:  ["Do the loud version first and apologise never.", "Pick the one that scares you slightly and start today.", "Do not wait for the group to agree."],
     Earth: ["Finish one unglamorous thing completely.", "Put it in writing, then put it down.", "Protect the hour you actually work in."],
     Air:   ["Say it out loud to one person before the day ends.", "Write the short version. The short version is the real one.", "Change your mind in public, it is fine."],
     Water: ["Answer the message you have been circling.", "Feel it all the way through, then make the call.", "Trust the first read, check the second."]
   };
-  const counsel = pick(rnd, counselBank[sign.el]) + " " + planet.do +
-    (rx.active ? " And read it twice before you send it." : "");
+  const counsel = pick(rnd, counselBank[sign.el]) + " " + planet.do + (rx.active ? " And read it twice before you send it." : "");
+  out.push('<div class="counsel"><span>What to actually do</span>' + counsel + "</div>");
 
-  return {
-    html:
-      '<p class="lead">' + opener + "</p>" +
-      "<p>" + hourLine + "</p>" +
-      "<p>" + chartLine + "</p>" +
-      "<p>" + hourCard + "</p>" +
-      "<p>" + signLine + "</p>" +
-      "<p>" + turnLine + suitNote + "</p>" +
-      "<p>" + moonLine + "</p>" +
-      '<div class="counsel"><span>What to actually do</span>' + counsel + "</div>",
-    counsel
-  };
+  return { html:out.join(""), counsel };
 }
 
 function weather(cards, rnd){
@@ -1080,8 +1223,8 @@ function weather(cards, rnd){
   const base = (lo, hi) => Math.round(lo + rnd() * (hi - lo));
   const clamp = v => Math.max(4, Math.min(99, v));
   return [
-    { nm:"Luck",    v:clamp(base(28, 88) + tone * 5), cls:"hot" },
-    { nm:"Energy",  v:clamp(base(30, 92) + tone * 3), cls:"" },
+    { nm:"Luck",    v:clamp(base(28, 88) + tone * 5), cls:"" },
+    { nm:"Energy",  v:clamp(base(30, 92) + tone * 3), cls:"heat" },
     { nm:"Clarity", v:clamp(base(25, 90) + tone * 4), cls:"cool" },
     { nm:"Nerve",   v:clamp(base(32, 94) + tone * 2), cls:"" }
   ];
@@ -1117,28 +1260,28 @@ function render(opts){
   const wx = weather(cards, drawn.rnd);
 
   $("k-date").textContent = now.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
-  $("k-hour").textContent = watch.name + " \u00b7 hour of " + ph.ruler;
-  $("k-moon").textContent = moon.name + " \u00b7 " + moon.lit + "% lit" + (rx.active ? " \u00b7 mercury rx" : "");
+  $("k-hour").textContent = watch.name + ", hour of " + ph.ruler;
+  $("k-moon").textContent = moon.name + ", " + moon.lit + " per cent lit" + (rx.active ? ", mercury rx" : "");
 
   const chartRows = [
-    ["Sun sign",       '<span class="glyph">' + sign.glyph + "</span> " + sign.name + "<small>" + sign.el + " \u00b7 " + sign.ruler + "</small>"],
-    ["Rising",         rising ? '<span class="glyph">' + rising.glyph + "</span> " + rising.name + "<small>approx \u00b7 no birthplace</small>"
-                              : "&mdash;<small>add a birth hour</small>"],
-    ["Standing card",  DECK[cards[1].idx].n + " \u00b7 " + DECK[cards[1].idx].name + "<small>birth card</small>"],
-    ["Soul card",      DECK[soul].n + " \u00b7 " + DECK[soul].name + "<small>reduced once more</small>"],
-    ["Planetary hour", PLANETS[ph.ruler].glyph + " " + ph.ruler + "<small>" + ph.dayRuler + "'s day \u00b7 hour " + (ph.hourIndex + 1) + "</small>"],
-    ["Moon",           moon.name + "<small>" + moon.lit + "% lit \u00b7 day " + Math.floor(moon.age) + "</small>"],
-    ["Mercury",        (rx.active ? '<span class="rx">retrograde</span>' : "direct") +
-                       "<small>approx \u00b7 " + Math.abs(rx.daysFromCentre) + "d " + (rx.daysFromCentre <= 0 ? "to" : "from") + " centre</small>"],
+    ["Sun sign",       '<span class="glyph">' + sign.glyph + "</span> " + sign.name + "<small>" + sign.el + ", " + sign.ruler + "</small>"],
+    ["Rising",         rising ? '<span class="glyph">' + rising.glyph + "</span> " + rising.name + "<small>approx, no birthplace</small>"
+                              : "Unknown<small>add a birth hour</small>"],
+    ["Standing card",  DECK[cards[1].idx].n + ". " + DECK[cards[1].idx].name + "<small>birth card</small>"],
+    ["Soul card",      DECK[soul].n + ". " + DECK[soul].name + "<small>reduced once more</small>"],
+    ["Planetary hour", PLANETS[ph.ruler].glyph + " " + ph.ruler + "<small>" + ph.dayRuler + "'s day, hour " + (ph.hourIndex + 1) + "</small>"],
+    ["Moon",           moon.name + "<small>" + moon.lit + " per cent, day " + Math.floor(moon.age) + "</small>"],
+    ["Mercury",        (rx.active ? '<span class="rx">Retrograde</span>' : "Direct") +
+                       "<small>approx, " + Math.abs(rx.daysFromCentre) + "d " + (rx.daysFromCentre <= 0 ? "to" : "from") + " centre</small>"],
     ["Year of the",    animal + "<small>4 Feb cutoff</small>"]
   ];
   $("chart").innerHTML = chartRows.map(row => "<div><dt>" + row[0] + "</dt><dd>" + row[1] + "</dd></div>").join("");
-  $("chart-for").textContent = (name ? esc(name) + " \u00b7 " : "") + bdate +
-    (bhour !== "" ? " \u00b7 born " + String(bhour).padStart(2,"0") + ":00" : "") +
-    " \u00b7 " + drawn.seeds.deckSize + " cards";
+  $("chart-for").textContent = (name ? esc(name) + ", " : "") + bdate +
+    (bhour !== "" ? ", born " + String(bhour).padStart(2,"0") + ":00" : "") +
+    ", " + drawn.seeds.deckSize + " cards";
 
   $("spread").innerHTML = cards.map((c, n) => {
-    const sub = c.card.major ? "Major Arcana" : c.card.suitName + " \u00b7 " + ELEMENTS[c.card.el].kin;
+    const sub = c.card.major ? "Major Arcana" : c.card.suitName + ", " + ELEMENTS[c.card.el].kin;
     return '<div class="slot">' +
       '<div class="slot-label"><span>' + c.slot.label + "</span><b>" + c.slot.note + "</b></div>" +
       '<div class="card" data-n="' + n + '" role="button" tabindex="0" aria-label="' + esc(c.slot.label) + ": " + esc(c.card.name) + (c.rev ? ", reversed" : "") + '">' +
@@ -1155,13 +1298,13 @@ function render(opts){
           "</div>" +
         "</div>" +
       "</div>" +
-      '<p class="card-kw" style="margin:0">' + sub + " &mdash; " + c.slot.intent + "</p>" +
+      '<p class="slot-note">' + sub + ". " + c.slot.intent + ".</p>" +
       (c.card.calm ? '<p class="reassure"><b>Do not panic</b>' + c.card.calm + "</p>" : "") +
       "</div>";
   }).join("");
 
   [...document.querySelectorAll(".card")].forEach((el, n) => {
-    setTimeout(() => el.classList.add("flipped"), 180 + n * 260);
+    setTimeout(() => el.classList.add("flipped"), 200 + n * 280);
     const toggle = () => el.classList.toggle("flipped");
     el.addEventListener("click", toggle);
     el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(); } });
@@ -1178,11 +1321,10 @@ function render(opts){
     document.querySelectorAll(".fill").forEach(f => { f.style.width = "calc(" + f.dataset.w + "% - 2px)"; });
   });
 
-  /* the odds panel */
   if (!weighted){
     $("odds-table").innerHTML = "<tr><th>Status</th></tr><tr><td>Flat deck. Every one of the " +
       drawn.seeds.deckSize + " cards has exactly the same chance.</td></tr>";
-    $("odds-note").textContent = "Switch Astrology back to \u201cweight the odds\u201d to apply the traditional correspondences.";
+    $("odds-note").textContent = "Switch Astrology back to weighting under Reading options to apply the traditional correspondences.";
   } else {
     $("odds-table").innerHTML =
       "<tr><th>Odds</th><th>Why</th><th>Cards lifted</th></tr>" +
@@ -1191,27 +1333,26 @@ function render(opts){
         (r.cards.length > 4 ? r.cards.length + " cards" : r.cards.join(", ")) + "</td></tr>").join("") +
       (drawn.effRate !== revRate
         ? '<tr><td class="mult">+10pp</td><td>Mercury retrograde tips more cards over</td><td>reversal chance now ' +
-          Math.round(drawn.effRate * 100) + "%</td></tr>"
+          Math.round(drawn.effRate * 100) + " per cent</td></tr>"
         : "");
-    $("odds-note").textContent = "Multipliers apply to a weighted shuffle, not to a lottery: a card at x2.5 is two and a half " +
-      "times as likely to come off the top, and the lowest-weighted card in the deck can still be the first one dealt.";
+    $("odds-note").textContent = "Multipliers apply to a weighted shuffle, not a lottery. A card at x2.5 is two and a half " +
+      "times as likely to come off the top, and the lowest weighted card in the deck can still be the first one dealt.";
   }
 
-  /* show your working */
   $("seedlist").innerHTML = [
-    ["standing card", bM + " + " + bD + " + " + bY + " \u2192 digit-reduced \u2192 " + DECK[cards[1].idx].n + " " + DECK[cards[1].idx].name + " (Greer's method)"],
-    ["day's deck",    'shuffled from "' + drawn.seeds.birthKey + " | " + drawn.seeds.dayKey + '" \u2014 ' + drawn.seeds.deckSize + " cards, 8 watches dealt off the top, no repeats"],
-    ["this watch",    "#" + (drawn.seeds.wb + 1) + " of 8 \u2192 " + DECK[cards[0].idx].name],
-    ["today's card",  "moon phase " + moon.idx + " + sun in " + signFor(now.getMonth() + 1, now.getDate()).name + " \u2192 " + DECK[cards[2].idx].name],
-    ["reversals",     revRate === 0 ? "off" : Math.round(drawn.effRate * 100) + "% chance per card, orientation only"],
-    ["planetary hour", ph.dayRuler + "'s day, hour " + (ph.hourIndex + 1) + " after sunrise \u2192 " + ph.ruler + " (Chaldean order)"],
-    ["weighting",     weighted ? drawn.reasons.length + " correspondences applied" : "off \u2014 flat deck"]
-  ].map(row => "<li><span>" + row[0] + "</span> &mdash; " + row[1] + "</li>").join("");
+    ["standing card", bM + " + " + bD + " + " + bY + ", digit reduced, giving " + DECK[cards[1].idx].n + ". " + DECK[cards[1].idx].name + " by Greer's method"],
+    ["day's deck",    'shuffled from "' + drawn.seeds.birthKey + " | " + drawn.seeds.dayKey + '", ' + drawn.seeds.deckSize + " cards, 8 watches dealt off the top, no repeats"],
+    ["this watch",    "number " + (drawn.seeds.wb + 1) + " of 8, giving " + DECK[cards[0].idx].name],
+    ["today's card",  "moon phase " + moon.idx + " plus sun in " + signFor(now.getMonth() + 1, now.getDate()).name + ", giving " + DECK[cards[2].idx].name],
+    ["reversals",     revRate === 0 ? "off" : Math.round(drawn.effRate * 100) + " per cent chance per card, orientation only"],
+    ["planetary hour", ph.dayRuler + "'s day, hour " + (ph.hourIndex + 1) + " after sunrise, giving " + ph.ruler + " in Chaldean order"],
+    ["weighting",     weighted ? drawn.reasons.length + " correspondences applied" : "off, flat deck"]
+  ].map(row => "<li><b>" + row[0] + "</b> " + row[1] + "</li>").join("");
   $("method-notes").textContent =
-    "Approximations, stated plainly: sunrise is treated as 06:00 because the page never asks where you are; " +
-    "the rising sign uses equal two-hour houses rather than an ephemeris; the moon is a mean synodic month, good to a few hours; " +
-    "Mercury retrograde is modelled from its 115.88-day synodic period rather than looked up, so it can be a few days out at the edges; " +
-    "and the Chinese year turns on 4 February rather than the true lunar new year.";
+    "Approximations, stated plainly. Sunrise is treated as 06:00 because the page never asks where you are. " +
+    "The rising sign uses equal two hour houses rather than an ephemeris. The moon is a mean synodic month, good to a few hours. " +
+    "Mercury retrograde is modelled from its 115.88 day synodic period rather than looked up, so it can be a few days out at the edges. " +
+    "The Chinese year turns on 4 February rather than the true lunar new year.";
 
   $("example-flag").hidden = !isExample;
   LAST = { cards, soul, read, wx, sign, rising, watch, ph, moon, rx, animal,
@@ -1222,18 +1363,18 @@ function readingText(){
   if (!LAST) return "";
   const L = LAST;
   return [
-    "HOUR & SIGN \u2014 " + new Date().toLocaleDateString() + " \u00b7 " + L.watch.name + " \u00b7 hour of " + L.ph.ruler,
-    L.sign.glyph + " " + L.sign.name + " (" + L.sign.el + ", " + L.sign.ruler + ")" +
-      (L.rising ? " \u00b7 " + L.rising.name + " rising" : "") +
-      " \u00b7 " + L.moon.name + " " + L.moon.lit + "%" +
-      (L.rx.active ? " \u00b7 Mercury retrograde" : "") + " \u00b7 Year of the " + L.animal,
+    "HOUR & SIGN, " + new Date().toLocaleDateString() + ", " + L.watch.name + ", hour of " + L.ph.ruler,
+    L.sign.name + " (" + L.sign.el + ", " + L.sign.ruler + ")" +
+      (L.rising ? ", " + L.rising.name + " rising" : "") +
+      ", " + L.moon.name + " " + L.moon.lit + " per cent" +
+      (L.rx.active ? ", Mercury retrograde" : "") + ", Year of the " + L.animal,
     "",
-    ...L.cards.map(c => c.slot.label.toUpperCase() + " \u2014 " + c.card.n + " " + c.card.name +
-      (c.rev ? " (reversed)" : "") + ": " + (c.rev ? c.card.rev : c.card.up)),
+    ...L.cards.map(c => c.slot.label.toUpperCase() + ": " + c.card.n + ". " + c.card.name +
+      (c.rev ? " (reversed)" : "") + ", " + (c.rev ? c.card.rev : c.card.up)),
     "",
     $("reading").innerText.trim(),
     "",
-    L.wx.map(d => d.nm + " " + d.v).join("  \u00b7  ")
+    L.wx.map(d => d.nm + " " + d.v).join(", ")
   ].join("\n");
 }
 
@@ -1277,10 +1418,8 @@ function tickCountdown(){
         if (saved.deckSize !== undefined) deckSize = Number(saved.deckSize);
         if (saved.weighted !== undefined) weighted = !!saved.weighted;
       }
-    } catch (e) { /* private window or blocked storage - fall through to the example */ }
+    } catch (e) { /* private window or blocked storage */ }
   }
-  /* The primer stays closed so the spread is the first thing you see; its
-     summary line is right under the masthead for anyone who wants it. */
   if (!bdate){ bdate = "1991-06-14"; bhour = "7"; isExample = true; }
 
   $("bdate").value = bdate;
@@ -1311,37 +1450,35 @@ function tickCountdown(){
   $("reshuffle").addEventListener("click", () => {
     document.querySelectorAll(".card").forEach(c => c.classList.remove("flipped"));
     setTimeout(() => document.querySelectorAll(".card").forEach((c, n) =>
-      setTimeout(() => c.classList.add("flipped"), n * 260)), 420);
+      setTimeout(() => c.classList.add("flipped"), n * 280)), 450);
   });
 
-  /* The one-question draw: crypto-random, unweighted, independent of everything
-     above, and different every time by design. */
   $("ask").addEventListener("click", () => {
     const ids = LAST && LAST.deckSize === 22 ? MAJOR_IDS : DECK.map(c => c.id);
     const card = DECK[ids[Math.floor(cryptoRnd() * ids.length)]];
-    const rev = (LAST ? LAST.revRate : 0.32) > 0 && cryptoRnd() < (LAST ? LAST.revRate : 0.32);
+    const rate = LAST ? LAST.revRate : 0.32;
+    const rev = rate > 0 && cryptoRnd() < rate;
     const qText = $("question").value.trim();
     $("oneoff-out").hidden = false;
     $("oneoff-result").innerHTML =
-      (qText ? '"' + esc(qText) + '" &mdash; ' : "") +
+      (qText ? '"' + esc(qText) + '" &rarr; ' : "") +
       "<b>" + card.name + "</b>" + (rev ? ", reversed" : "") + ". " +
       (rev ? card.rev : card.up) + ". <em>" + card.voice + "</em>";
     $("oneoff-meta").textContent =
-      "Drawn from " + ids.length + " cards with crypto.getRandomValues \u2014 flat odds, no weighting, " +
-      "and not saved anywhere. Press again for a genuinely different card.";
+      "Drawn from " + ids.length + " cards with crypto.getRandomValues. Flat odds, no weighting, " +
+      "nothing saved. Press again for a genuinely different card.";
   });
 
+  const flash = (el, msg) => { el.textContent = msg; el.hidden = false; setTimeout(() => { el.hidden = true; }, 1900); };
+
   $("copy").addEventListener("click", async () => {
-    const t = $("toast");
-    const done = msg => { t.textContent = msg; t.hidden = false; setTimeout(() => { t.hidden = true; }, 1800); };
-    try { await navigator.clipboard.writeText(readingText()); done("Copied"); }
+    try { await navigator.clipboard.writeText(readingText()); flash($("toast2"), "Copied"); }
     catch (e) {
       const r = document.createRange();
       r.selectNodeContents($("reading"));
       const s = getSelection();
       s.removeAllRanges(); s.addRange(r);
-      t.textContent = "Selected \u2014 press copy"; t.hidden = false;
-      setTimeout(() => { t.hidden = true; }, 2600);
+      flash($("toast2"), "Selected, press copy");
     }
   });
 
@@ -1352,11 +1489,8 @@ function tickCountdown(){
     u.searchParams.set("b", LAST.bdate);
     if (LAST.bhour !== "") u.searchParams.set("t", LAST.bhour);
     if (LAST.name) u.searchParams.set("n", LAST.name);
-    const t = $("toast");
-    try { await navigator.clipboard.writeText(u.toString()); t.textContent = "Link copied"; }
-    catch (e) { t.textContent = "Copy failed"; }
-    t.hidden = false;
-    setTimeout(() => { t.hidden = true; }, 1800);
+    try { await navigator.clipboard.writeText(u.toString()); flash($("toast2"), "Link copied"); }
+    catch (e) { flash($("toast2"), "Copy failed"); }
   });
 
   tickCountdown();
