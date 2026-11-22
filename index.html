@@ -326,6 +326,18 @@ button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--g
 .reading p.lead strong{font-style:normal}
 .reading strong{font-weight:600;color:var(--gold)}
 .reading .said{color:var(--spectre);font-style:italic}
+.outlook-head{
+  font-family:var(--font-label); font-size:.78rem; font-weight:700; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--spectre); margin:2rem 0 1rem;
+}
+.outlook{
+  margin:0 0 1rem; max-width:62ch; padding-left:.9rem;
+  border-left:2px solid var(--rule);
+}
+.outlook b{
+  display:block; font-family:var(--font-label); font-size:.72rem; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:.2rem;
+}
 .counsel{
   border:1px solid var(--rule); border-left:3px solid var(--gold);
   padding:1.1rem 1.2rem; margin-top:1.6rem; font-size:1.1rem; background:rgba(224,165,63,.04);
@@ -781,6 +793,24 @@ const ELEMENTS = {
   Air:   { verb:"quick and sideways", grain:"talk it into shape",   kin:"signal", suit:"swords" },
   Water: { verb:"deep and tidal",     grain:"let it rise and fall", kin:"tide",   suit:"cups" }
 };
+/* What a season pushes on everybody, which is a different thing from what a
+   sign is like natally. Kept separate so the horoscope section cannot repeat
+   the star sign section's wording when the sun happens to be in your sign. */
+const SEASON_PRESSURE = {
+  Capricorn:"getting the dull thing finished before the year eats it",
+  Aquarius:"detachment, and opinions delivered from a safe distance",
+  Pisces:"softness, and letting the edges blur a little",
+  Aries:"starting things before the last ones are finished",
+  Taurus:"comfort, and a flat refusal to be hurried",
+  Gemini:"talking it out rather than sitting with it",
+  Cancer:"staying in, and minding who has been fed",
+  Leo:"being seen, and minding whether you are",
+  Virgo:"tidying and correcting things that were already fine",
+  Libra:"smoothing it over before it has actually been settled",
+  Scorpio:"intensity, and saying the quiet part out loud",
+  Sagittarius:"escape plans and unreasonably large opinions"
+};
+
 function signIndex(month, day){
   for (let i = 0; i < SIGNS.length; i++){
     const s = SIGNS[i], fm = s.from[0], fd = s.from[1], tm = s.to[0], td = s.to[1];
@@ -1120,10 +1150,13 @@ function compose(ctx, cards, soul, rnd){
     "</strong> sun, " + sign.trait + ".</p>");
   out.push("<p>That puts you under " + sign.ruler + ", in the element of " + sign.el + ", which runs " + el.verb +
     ". Your default move, when nothing else is pressing, is to " + el.grain + ". " +
-    (rising
-      ? "With <strong>" + rising.name + "</strong> rising, that is not the version people meet first. They get " +
-        rising.trait + ", and have to stay a while to find the " + sign.name + " underneath."
-      : "No birth hour given, so there is no rising sign here. Add one above and you get the mask as well as the face.") +
+    (!rising
+      ? "No birth hour given, so there is no rising sign here. Add one above and you get the mask as well as the face."
+      : rising.name === sign.name
+        ? "You were born close enough to sunrise that <strong>" + rising.name +
+          "</strong> is rising as well as sitting. That doubles it rather than disguising it, so what people meet first is simply more of the same."
+        : "With <strong>" + rising.name + "</strong> rising, that is not the version people meet first. They get " +
+          rising.trait + ", and have to stay a while to find the " + sign.name + " underneath.") +
     " You were born in a <strong>" + animal + "</strong> year, which mostly means " +
     pick(rnd, ["you will get away with it", "people underestimate your timing", "stubbornness counts as a strategy here", "you are owed a favour somewhere"]) + ".</p>");
   out.push("<p>None of that changes. It is the fixed part, and everything below is weather blowing across it.</p>");
@@ -1138,16 +1171,18 @@ function compose(ctx, cards, soul, rnd){
     ", the " + ordinal(ph.hourIndex + 1) + " hour after sunrise on a day ruled by " + art(ph.dayRuler) + ". " +
     art(ph.ruler).charAt(0).toUpperCase() + art(ph.ruler).slice(1) + " governs " + planet.of +
     ", and the hour is " + planet.mood + ".</p>");
-  out.push("<p>The sun is currently in <strong>" + seasonSign.name + "</strong>, so the season is pushing everyone toward being " +
-    seasonSign.trait + ", whether it suits them or not. The moon is <strong>" + moon.name + "</strong> at " +
-    moon.lit + " per cent lit, which is the part of the month where " + moon.phrase + ".</p>");
+  out.push("<p>The sun is currently in <strong>" + seasonSign.name + "</strong>, so the season is pushing everyone toward " +
+    SEASON_PRESSURE[seasonSign.name] + ", whether it suits them or not" +
+    (seasonSign.name === sign.name ? ", and since that is your own sign you will feel it as encouragement rather than pressure" : "") +
+    ". The moon is <strong>" + moon.name + "</strong> at " + moon.lit + " per cent lit. " +
+    moon.phrase.charAt(0).toUpperCase() + moon.phrase.slice(1) + ".</p>");
   if (rx.active){
     out.push("<p><strong>Mercury is retrograde</strong>, give or take a few days, which is the one piece of sky most people notice. Expect the misread message and the thing that needs saying twice.</p>");
   }
 
   /* 3. the cards */
   out.push('<h3>Your cards</h3>');
-  out.push("<p><strong>" + hc.card.name + (hc.rev ? ", reversed" : "") + "</strong> sits in the hour. " +
+  out.push("<p><strong>" + hc.card.name + "</strong>" + (hc.rev ? ", reversed," : "") + " sits in the hour. " +
     "This is the card for this stretch of the day only, dealt off the hand your deck was shuffled into at midnight, and it will be a different one when the watch turns. " +
     "It reads as " + full(hc) + ". " +
     (hc.card.major ? "Being a Major, it is talking about the shape of things rather than an errand. "
@@ -1160,7 +1195,7 @@ function compose(ctx, cards, soul, rnd){
     (soul !== sc.idx ? "Reduce it once more and you get <strong>" + DECK[soul].name + "</strong>, the quieter engine underneath the obvious one. " : "It reduces to itself, which is unusual and makes it louder than most. ") +
     '<span class="said">' + sc.card.voice + "</span></p>");
 
-  out.push("<p><strong>" + tc.card.name + (tc.rev ? ", reversed" : "") + "</strong> is the turning, drawn from what the eight watches left behind and weighted by the season rather than the hour. " +
+  out.push("<p><strong>" + tc.card.name + "</strong>" + (tc.rev ? ", reversed," : "") + " is the turning, drawn from what the eight watches left behind and weighted by the season rather than the hour. " +
     "It holds its face and its orientation all day, so this one is today's news rather than this afternoon's. " +
     "It reads as " + full(tc) + ". " +
     '<span class="said">' + tc.card.voice + "</span></p>");
@@ -1256,14 +1291,76 @@ function compose(ctx, cards, soul, rnd){
       "without looking for a pattern that is not there.</p>");
   }
 
+  /* What it actually means for the next few hours. Every line is derived from
+     what is on the table rather than chosen for comfort, so a poor spread is
+     allowed to say the day will be poor, and a good one still names a risk. */
   const tone = cards.reduce((a, c) => a + (c.rev ? -c.card.tone : c.card.tone), 0);
-  out.push("<p>" + (tone >= 3 ? "Taken together the spread is unusually bright. If you have been waiting for a good day to ask for something, this is it."
-    : tone >= 1 ? "The balance of the spread tilts gently positive. Not a parade, but the wind is behind you."
-    : tone === 0 ? "The spread balances out to nothing in particular, which is its own kind of answer: today is yours to push one way or the other."
-    : tone >= -2 ? "The spread leans heavy. Nothing here is a disaster, but it is a day for maintenance rather than ambition."
-    : "This is a heavy spread. Lower the bar, finish one thing, and let the rest wait for the hour to turn.") +
-    " Your " + sign.name + " sun would rather " + el.grain + ", and " + art(ph.ruler) +
-    " is running this hour. Between the two of them, that is what the line below comes down to.</p>");
+  const score = c => c.rev ? -c.card.tone : c.card.tone;
+  const suitsHere = cards.filter(c => !c.card.major).map(c => c.card.suit);
+  const has = s => suitsHere.indexOf(s) !== -1;
+  const ranked = cards.slice().sort((a, b) => score(a) - score(b));
+  const heavy = ranked[0], bright = ranked[ranked.length - 1];
+
+  let mood = tone >= 3 ? "Light, and unusually willing. You will say yes to things, so be a little careful what you say yes to."
+    : tone >= 1 ? "Steady, with some lift in it. Not a parade, but nothing is dragging either."
+    : tone === 0 ? "Even. Neither up nor down, which means your mood today is mostly a decision rather than a given."
+    : tone >= -2 ? "Lower than you would like, and thinner than it will look from outside. You will be fine and you will not feel fine."
+    : "Heavy. There is no point pretending otherwise, and the pretending will cost you more than the mood does.";
+  mood += moon.dir === "full" ? " A full moon amplifies whatever that already is, in both directions."
+    : moon.dir === "waning" ? " A waning moon will not lift it for you, so do not sit waiting to be lifted."
+    : " A waxing moon is quietly on your side.";
+  if (has("cups")) mood += " Cups are on the table, so you will feel today rather than think it.";
+
+  /* Card led before clock led, otherwise the planetary hour hands everybody
+     the same sentence for three hours regardless of what they drew. */
+  let think;
+  if (rx.active && has("swords"))
+    think = "Fast and badly aimed. Mercury is retrograde and Swords are out, which is the pairing that produces the message you wish you had read twice before sending.";
+  else if (cards.some(c => c.idx === 18))
+    think = "Foggy. The Moon is in your spread, so you do not have the whole picture, and the first conclusion you reach today is the one to distrust.";
+  else if (revs >= 2)
+    think = "Circular. Two reversed cards means you will go round the same thought several times before it actually moves anywhere.";
+  else if (has("swords"))
+    think = "Sharper than usual, and a little sharper than you intend. You will be right and still manage to land it wrong.";
+  else if (cards.some(c => c.idx === 2) || cards.some(c => c.idx === 9))
+    think = "Quiet, and better for it. The spread is pointing inward, so the answer today arrives while you are not actively chasing it.";
+  else if (has("cups"))
+    think = "Led by feeling rather than logic, which is not the same as being wrong. Just do not try to justify it afterwards with reasons you did not use.";
+  else if (ph.ruler === "Mercury")
+    think = "Quick. Mercury runs this hour, so you will think faster than you check, and the gap between those two is where the mistakes live.";
+  else if (sign.el === "Air")
+    think = "Clear, which for an Air sun is the ordinary state, and exactly why you will overthink the one thing that is not.";
+  else
+    think = "Ordinary. Nothing is sharpening your thinking today and nothing is clouding it, which makes it a good day to settle something you have been deferring.";
+
+  let day;
+  if (oppEl.length)
+    day = "It will feel like wading. Your own element is working against one of the cards, so the same tasks will take longer and cost more attention than they should. Plan fewer things, not more.";
+  else if (has("wands") || ph.ruler === "Mars")
+    day = "Forward moving and a bit loud. There is more energy about than usual and it will go somewhere whether or not you aim it.";
+  else if (has("pentacles") || ph.ruler === "Saturn")
+    day = "Slow and practical. Nothing dramatic is going to happen, which is rather the point: this is a day that pays you for finishing rather than starting.";
+  else if (ph.ruler === "Venus")
+    day = "Sociable. The useful things today will happen through other people rather than at a desk.";
+  else if (majors === 3)
+    day = "Larger than its own contents. Three Majors makes a day feel significant even when the actual events are small, so do not go hunting for drama to match the feeling.";
+  else
+    day = "Unremarkable in shape, which leaves it yours to direct. Nothing in the spread is forcing a particular kind of day on you.";
+
+  const watchFor = score(heavy) < 0
+    ? "The hardest card on the table is <strong>" + heavy.card.name + "</strong>" +
+      (heavy.rev ? ", reversed," : ",") + " which reads as " +
+      (heavy.rev ? heavy.card.rev : heavy.card.up) + ". The failure mode is " +
+      (heavy.rev ? "pretending it is not there and carrying on as though it were" : "acting on it before it has finished happening") +
+      ". Let it land before you respond to it."
+    : "Nothing here is heavy, and that is its own risk. With <strong>" + bright.card.name +
+      "</strong> setting the tone, the failure mode today is overreach: agreeing to one more thing than you can actually carry, and noticing on Thursday.";
+
+  out.push('<h4 class="outlook-head">What this means for your day</h4>');
+  out.push('<p class="outlook"><b>Your mood</b>' + mood + "</p>");
+  out.push('<p class="outlook"><b>Your thinking</b>' + think + "</p>");
+  out.push('<p class="outlook"><b>The day itself</b>' + day + "</p>");
+  out.push('<p class="outlook"><b>Watch for</b>' + watchFor + "</p>");
 
   /* 5. what to do */
   const counselBank = {
