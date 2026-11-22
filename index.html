@@ -201,7 +201,9 @@ table.odds td.mult{color:var(--spectre);font-weight:700;white-space:nowrap;font-
   font-family:var(--font-label); font-size:.74rem; font-weight:600; letter-spacing:.16em;
   text-transform:uppercase; color:var(--gold); line-height:1.3;
 }
-.field label i{font-style:normal;color:var(--bone-dim);font-weight:400;letter-spacing:.1em}
+/* Qualifiers read as ordinary words, not as more shouting. Uppercase plus
+   letter spacing is fine for a two word label and unreadable for a sentence. */
+.field label i{font-style:normal;color:var(--bone-dim);font-weight:400;letter-spacing:.02em;text-transform:none}
 .field-wide{grid-column:1 / -1}
 .field input,.field select{
   font-family:var(--font-label); font-size:1rem; font-weight:400; color:var(--bone);
@@ -209,6 +211,10 @@ table.odds td.mult{color:var(--spectre);font-weight:700;white-space:nowrap;font-
   padding:.72rem .75rem; width:100%; min-width:0; height:3rem; line-height:1.4;
 }
 .field select{appearance:none;background-image:none}
+.field .hint{
+  font-family:var(--font-label); font-size:.78rem; font-weight:400; letter-spacing:.02em;
+  color:var(--bone-dim); text-transform:none; line-height:1.5;
+}
 .field input::placeholder{color:var(--bone-dim);opacity:.55}
 .field input:focus-visible,.field select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .form-actions{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin-top:1.3rem}
@@ -225,9 +231,9 @@ button.ghost{
 }
 button.ghost:hover{color:var(--void);background:var(--gold);border-color:var(--gold);box-shadow:none}
 .example-flag{
-  font-family:var(--font-label); font-size:.74rem; font-weight:600; letter-spacing:.14em;
-  text-transform:uppercase; color:var(--spectre); border:1px solid rgba(79,191,168,.4);
-  padding:.45rem .7rem; display:inline-block; margin-top:1.1rem;
+  font-family:var(--font-label); font-size:.82rem; font-weight:400; letter-spacing:.02em;
+  color:var(--spectre); border:1px solid rgba(79,191,168,.4); line-height:1.5;
+  padding:.5rem .7rem; display:inline-block; margin-top:1.1rem;
 }
 
 /* ---- chart ---- */
@@ -447,6 +453,28 @@ footer{
 footer b{color:var(--gold);font-weight:600}
 .toast{font-family:var(--font-label);font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--spectre)}
 
+/* ---- phones ----
+   The notes beside a heading are pushed right by margin-left:auto, which is
+   right at desktop width and looks like a mistake once they wrap onto their
+   own line. Below 640px they sit under the heading, left aligned, and the
+   letter spacing comes down so a wrapped label is not three lines of caps. */
+/* Must sit after the .card rules: a media query adds no specificity, so an
+   earlier max-width here loses to the later .card{max-width:100%}. */
+@media (max-width:620px){
+  .card{max-width:240px;width:100%;margin:0 auto}
+}
+
+@media (max-width:640px){
+  .sec-head{align-items:flex-start;gap:.15rem}
+  .sec-head .note{margin-left:0;text-align:left;width:100%;font-size:.72rem;letter-spacing:.06em}
+  .field label{letter-spacing:.1em}
+  .slot-label{letter-spacing:.1em}
+  .takeaway-label,.outlook-head,.scale b,.outlook b{letter-spacing:.14em}
+  .pick-prompt{letter-spacing:.02em;font-size:.9rem}
+  .fan{gap:.4rem}
+  footer{gap:.2rem 1rem}
+}
+
 @media (prefers-reduced-motion: reduce){
   *{transition-duration:.01ms !important}
   .cat-eyes,.cat-tail{animation:none !important}
@@ -568,8 +596,9 @@ footer b{color:var(--gold);font-weight:600}
             <input type="text" id="bname" name="bname" maxlength="24" placeholder="For the heading">
           </div>
           <div class="field field-wide">
-            <label for="question">What are you asking? <i>the deck would rather you had something in mind</i></label>
+            <label for="question">Your question <i>optional</i></label>
             <input type="text" id="question" maxlength="90" placeholder="Should I send the email?">
+            <span class="hint">The deck would rather you had something in mind.</span>
           </div>
         </div>
         <div class="form-actions">
