@@ -1540,20 +1540,18 @@ function compose(ctx, cards, soul, rnd){
 
   const hourCardId = PLANET_MAJOR[ph.ruler];
   if (cards.some(c => c.idx === hourCardId)){
-    links.push("<strong>" + DECK[hourCardId].name + "</strong> is the card that has always belonged to " + art(ph.ruler) +
-      ", and it has turned up in an hour that " + ph.ruler + " rules. The clock and the deck are saying the same thing, " +
-      "which is as close to emphasis as a spread gets.");
+    links.push("<strong>" + DECK[hourCardId].name + "</strong> is " + ph.ruler +
+      "'s own card, drawn in " + ph.ruler + "'s hour. Clock and deck agree.");
   }
   const mySignCardId = SIGN_MAJOR[sign.name];
   if (cards.some(c => c.idx === mySignCardId)){
-    links.push("Your own sign's card, <strong>" + DECK[mySignCardId].name + "</strong>, is sitting in the spread. " +
-      sign.name + " has been handed its own symbol back, which reads as being asked to be more like yourself today, not less.");
+    links.push("Your sign's own card, <strong>" + DECK[mySignCardId].name +
+      "</strong>. Be more " + sign.name + " today, not less.");
   }
   const seasonCardId = SIGN_MAJOR[seasonSign.name];
   if (seasonSign.name !== sign.name && cards.some(c => c.idx === seasonCardId)){
-    links.push("The sun is in " + seasonSign.name + " and <strong>" + DECK[seasonCardId].name +
-      "</strong>, that sign's card, has come up. The pressure is coming from the season rather than from your own chart, " +
-      "so it will pass on its own.");
+    links.push("<strong>" + DECK[seasonCardId].name + "</strong> belongs to " + seasonSign.name +
+      ", and the sun is there now. The pressure is external. It passes.");
   }
 
   /* The strongest link available: the house says where in your life, the
@@ -1564,59 +1562,56 @@ function compose(ctx, cards, soul, rnd){
   const matchHouse = minorsAll.filter(c => c.card.el === hEl);
   const clashHouse = minorsAll.filter(c => DIGNITY[hEl][c.card.el] === "opposed");
   if (matchHouse.length){
-    links.push("The moon is lighting your " + ordinalHouse(mHouse) + " house, which is " + HOUSES[mHouse - 1] +
-      ", and that house is " + hEl + ". So " + (matchHouse.length > 1 ? "are " : "is ") +
+    links.push("Your " + ordinalHouse(mHouse) + " house is lit: " + HOUSES[mHouse - 1] + ". It is " + hEl +
+      ", and so " + (matchHouse.length > 1 ? "are " : "is ") +
       matchHouse.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") +
-      ". The sky and the deck have named the same part of your life, which is the closest this gets to a straight answer.");
+      ". Sky and deck name the same thing. That is as close to a straight answer as this gets.");
   } else if (clashHouse.length){
-    links.push("The moon is lighting your " + ordinalHouse(mHouse) + " house, " + HOUSES[mHouse - 1] +
-      ", which is " + hEl + ". The cards came back " + clashHouse.map(c => c.card.el).join(" and ") +
-      " instead. When the sky points at one part of your life and the deck answers about another, the usual reason is that the first is the question you are willing to ask and the second is the one underneath it.");
+    links.push("Your " + ordinalHouse(mHouse) + " house is lit: " + HOUSES[mHouse - 1] + ", which is " + hEl +
+      ". The cards came back " + clashHouse.map(c => c.card.el).join(" and ") +
+      ". The house is the question you will ask. The cards are the one underneath it.");
   } else if (minorsAll.length === 0){
-    links.push("The moon is lighting your " + ordinalHouse(mHouse) + " house, " + HOUSES[mHouse - 1] +
-      ", and the cards are all Majors, so they will not narrow it down for you. Read the house as the setting and the Majors as the weather in it.");
+    links.push("Your " + ordinalHouse(mHouse) + " house is lit: " + HOUSES[mHouse - 1] +
+      ". All three cards are Majors, so they will not narrow it. House is the room, Majors are the weather in it.");
   }
 
   const minors = cards.filter(c => !c.card.major);
   const sameEl = minors.filter(c => c.card.el === sign.el);
   const oppEl = minors.filter(c => DIGNITY[sign.el][c.card.el] === "opposed");
   if (sameEl.length){
-    links.push("You are " + indef(sign.el) + " <strong>" + sign.el + "</strong> sign, and " +
-      (sameEl.length > 1 ? "two of the cards are " : "one of the cards is ") +
-      sameEl.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") + ", " + sign.el +
-      " as well. The deck has handed you your own element, so whatever it is asking for should feel natural rather than effortful.");
+    links.push("You are " + sign.el + ". So " + (sameEl.length > 1 ? "are " : "is ") +
+      sameEl.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") +
+      ". Your own element, handed back. Whatever it asks should come easily.");
   }
   if (oppEl.length){
-    links.push("Your own element, <strong>" + sign.el + "</strong>, runs against " +
-      oppEl.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") +
-      ", which " + (oppEl.length > 1 ? "are " : "is ") + oppEl[0].card.el +
-      ". Opposed elements weaken each other, so this is the part of the day that will feel like wading. Do it anyway, just slower.");
+    links.push("Your " + sign.el + " runs against " +
+      oppEl.map(c => "<strong>" + c.card.name + "</strong>").join(" and ") + ", which " +
+      (oppEl.length > 1 ? "are " : "is ") + oppEl[0].card.el +
+      ". Opposed elements weaken both. Expect to wade. Do it anyway.");
   }
 
   const beginnings = cards.filter(c => WAXING_MAJORS.includes(c.idx)).length;
   const endings = cards.filter(c => WANING_MAJORS.includes(c.idx)).length;
   if (moon.dir === "waxing" && beginnings && !endings)
-    links.push("A waxing moon and the cards of beginning in the same spread is the cleanest alignment on offer. Start the thing.");
+    links.push("Waxing moon, cards of beginning. Cleanest alignment there is. Start it.");
   else if (moon.dir === "waxing" && endings && !beginnings)
-    links.push("The moon is still growing but the cards are the cards of ending. Something needs finishing before the new thing can have the room, and the order matters.");
+    links.push("Waxing moon, cards of ending. Finish something first. The order matters.");
   else if (moon.dir === "waning" && endings && !beginnings)
-    links.push("A waning moon and the cards of ending agree with each other. This is a week for closing rather than opening, and it will not feel like a loss.");
+    links.push("Waning moon, cards of ending. A week for closing. It will not feel like a loss.");
   else if (moon.dir === "waning" && beginnings && !endings)
-    links.push("The moon is shrinking while the cards point at beginnings. Start it quietly and do not announce it until the moon turns.");
+    links.push("Waning moon, cards of beginning. Start it quietly. Announce nothing yet.");
   else if (moon.dir === "full" && (beginnings || endings))
-    links.push("A full moon lights both the beginnings and the endings at once, which is why the spread can feel like it is arguing with itself. It is not. It is showing you both ends of the same thing.");
+    links.push("Full moon, beginnings and endings lit together. The spread is not arguing with itself. It is showing you both ends of one thing.");
 
   if (rx.active && cards.some(c => c.card.suit === "swords"))
-    links.push("Mercury is retrograde and Swords, the suit of speech and thought, are on the table. That is the combination that produces the message you wish you had read twice.");
+    links.push("Mercury retrograde, Swords on the table. That is the message you wish you had read twice.");
 
   if (links.length){
-    out.push("<p>Three separate systems were asked the same thing just now: the sign you were born under, the sky as it stands this hour, and the cards. Here is where they actually touch.</p>");
+    out.push("<p>Three systems, one question. Where they touch:</p>");
     links.forEach(l => out.push("<p>" + l + "</p>"));
   } else {
-    out.push("<p>Three separate systems were asked the same thing just now, and today they are not echoing each other. " +
-      "Nothing in the sky has picked up the cards, and the cards have not picked up your chart. " +
-      "That is worth knowing rather than worth hiding: it means the cards are on their own today, and you can read them plainly, " +
-      "without looking for a pattern that is not there.</p>");
+    out.push("<p>Three systems, one question, and today they are not echoing each other. " +
+      "Nothing in the sky has picked up the cards. Read the cards plainly and do not go looking for a pattern that is not there.</p>");
   }
 
   /* What it actually means for the next few hours. Every line is derived from
@@ -1629,60 +1624,59 @@ function compose(ctx, cards, soul, rnd){
   const ranked = cards.slice().sort((a, b) => score(a) - score(b));
   const heavy = ranked[0], bright = ranked[ranked.length - 1];
 
-  let mood = tone >= 3 ? "Light, and unusually willing. You will say yes to things, so be a little careful what you say yes to."
-    : tone >= 1 ? "Steady, with some lift in it. Not a parade, but nothing is dragging either."
-    : tone === 0 ? "Even. Neither up nor down, which means your mood today is mostly a decision rather than a given."
-    : tone >= -2 ? "Lower than you would like, and thinner than it will look from outside. You will be fine and you will not feel fine."
-    : "Heavy. There is no point pretending otherwise, and the pretending will cost you more than the mood does.";
-  mood += moon.dir === "full" ? " A full moon amplifies whatever that already is, in both directions."
-    : moon.dir === "waning" ? " A waning moon will not lift it for you, so do not sit waiting to be lifted."
-    : " A waxing moon is quietly on your side.";
-  if (has("cups")) mood += " Cups are on the table, so you will feel today rather than think it.";
+  let mood = tone >= 3 ? "Light. You will say yes to things. Mind what."
+    : tone >= 1 ? "Steady. Nothing is dragging."
+    : tone === 0 ? "Flat. Today your mood is a decision, not a given."
+    : tone >= -2 ? "Low. You will be fine. You will not feel fine."
+    : "Heavy. Do not pretend otherwise, it costs more than the mood does.";
+  mood += moon.dir === "full" ? " A full moon doubles it, whichever way it runs."
+    : moon.dir === "waning" ? " A waning moon will not lift it. Do not wait to be lifted."
+    : " A waxing moon is on your side.";
+  if (has("cups")) mood += " Cups on the table: you will feel today, not think it.";
 
   /* Card led before clock led, otherwise the planetary hour hands everybody
      the same sentence for three hours regardless of what they drew. */
   let think;
   if (rx.active && has("swords"))
-    think = "Fast and badly aimed. Mercury is retrograde and Swords are out, which is the pairing that produces the message you wish you had read twice before sending.";
+    think = "Fast and badly aimed. Mercury retrograde, Swords out. Read it twice before you send it.";
   else if (cards.some(c => c.idx === 18))
-    think = "Foggy. The Moon is in your spread, so you do not have the whole picture, and the first conclusion you reach today is the one to distrust.";
+    think = "Foggy. You do not have the whole picture. Distrust your first conclusion.";
   else if (revs >= 2)
-    think = "Circular. Two reversed cards means you will go round the same thought several times before it actually moves anywhere.";
+    think = "Circular. You will lap the same thought a few times before it moves.";
   else if (has("swords"))
-    think = "Sharper than usual, and a little sharper than you intend. You will be right and still manage to land it wrong.";
+    think = "Sharp. Sharper than you mean. You will be right and land it wrong.";
   else if (cards.some(c => c.idx === 2) || cards.some(c => c.idx === 9))
-    think = "Quiet, and better for it. The spread is pointing inward, so the answer today arrives while you are not actively chasing it.";
+    think = "Quiet. The answer turns up when you stop chasing it.";
   else if (has("cups"))
-    think = "Led by feeling rather than logic, which is not the same as being wrong. Just do not try to justify it afterwards with reasons you did not use.";
+    think = "Feeling, not logic. That is not the same as wrong. Do not justify it afterwards with reasons you never used.";
   else if (ph.ruler === "Mercury")
-    think = "Quick. Mercury runs this hour, so you will think faster than you check, and the gap between those two is where the mistakes live.";
+    think = "Quick. You will think faster than you check. The gap is where the mistakes live.";
   else if (sign.el === "Air")
-    think = "Clear, which for an Air sun is the ordinary state, and exactly why you will overthink the one thing that is not.";
+    think = "Clear, as usual, which is why you will overthink the one thing that is not.";
   else
-    think = "Ordinary. Nothing is sharpening your thinking today and nothing is clouding it, which makes it a good day to settle something you have been deferring.";
+    think = "Ordinary. Nothing sharpening it, nothing clouding it. Good day to settle something you have been putting off.";
 
   let day;
   if (oppEl.length)
-    day = "It will feel like wading. Your own element is working against one of the cards, so the same tasks will take longer and cost more attention than they should. Plan fewer things, not more.";
+    day = "Wading. Everything costs more attention than it should. Plan fewer things.";
   else if (has("wands") || ph.ruler === "Mars")
-    day = "Forward moving and a bit loud. There is more energy about than usual and it will go somewhere whether or not you aim it.";
+    day = "Fast and loud. The energy goes somewhere whether you aim it or not.";
   else if (has("pentacles") || ph.ruler === "Saturn")
-    day = "Slow and practical. Nothing dramatic is going to happen, which is rather the point: this is a day that pays you for finishing rather than starting.";
+    day = "Slow. It pays for finishing, not starting.";
   else if (ph.ruler === "Venus")
-    day = "Sociable. The useful things today will happen through other people rather than at a desk.";
+    day = "Sociable. The useful things happen through people, not at a desk.";
   else if (majors === 3)
-    day = "Larger than its own contents. Three Majors makes a day feel significant even when the actual events are small, so do not go hunting for drama to match the feeling.";
+    day = "Bigger than its contents. Three Majors make a small day feel significant. Do not hunt for drama to match it.";
   else
-    day = "Unremarkable in shape, which leaves it yours to direct. Nothing in the spread is forcing a particular kind of day on you.";
+    day = "Unremarkable. Yours to direct.";
 
   const watchFor = score(heavy) < 0
-    ? "The hardest card on the table is <strong>" + heavy.card.name + "</strong>" +
-      (heavy.rev ? ", reversed," : ",") + " which reads as " +
-      (heavy.rev ? heavy.card.rev : heavy.card.up) + ". The failure mode is " +
-      (heavy.rev ? "pretending it is not there and carrying on as though it were" : "acting on it before it has finished happening") +
-      ". Let it land before you respond to it."
-    : "Nothing here is heavy, and that is its own risk. With <strong>" + bright.card.name +
-      "</strong> setting the tone, the failure mode today is overreach: agreeing to one more thing than you can actually carry, and noticing on Thursday.";
+    ? "<strong>" + heavy.card.name + "</strong>" + (heavy.rev ? ", reversed" : "") + ". " +
+      (s => s.charAt(0).toUpperCase() + s.slice(1))(heavy.rev ? heavy.card.rev : heavy.card.up) + ". Do not " +
+      (heavy.rev ? "carry on as though it were not there" : "act on it before it has finished") +
+      ". Let it land first."
+    : "Nothing heavy here, which is the risk. <strong>" + bright.card.name +
+      "</strong> sets the tone, so you will take on one thing more than you can carry and notice on Thursday.";
 
   out.push('<h4 class="outlook-head">What this means for your day</h4>');
   out.push('<p class="outlook"><b>Your mood</b>' + mood + "</p>");
